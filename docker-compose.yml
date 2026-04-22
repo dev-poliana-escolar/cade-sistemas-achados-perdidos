@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: cade_db
+    environment:
+      POSTGRES_DB: cade_db
+      POSTGRES_USER: cade_user
+      POSTGRES_PASSWORD: cade234
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

@@ -5,4 +5,6 @@
 
 O sistema de achados e perdidos do Instituto Federal do Rio Grande do Norte (IFRN), campus Parnamirim, tem como objetivo permitir que alunos e servidores consultem e cadastrem itens perdidos de forma remota, além de automatizar os processos de doação e o ciclo de vida dos objetos encontrados.
 
-**Ferramentas de IA utilizadas:** Qwen e NotebookLLM
+**Ferramentas de IA utilizadas:** Qwen, NotebookLLM e Claude
+
+**Documento de decisão de arquitetura:** [Architecture Decision Record](docs/ADR-001.md)

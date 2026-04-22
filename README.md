@@ -8,3 +8,24 @@ O sistema de achados e perdidos do Instituto Federal do Rio Grande do Norte (IFR
 **Ferramentas de IA utilizadas:** Qwen, NotebookLLM e Claude
 
 **Documento de decisão de arquitetura:** [Architecture Decision Record](docs/ADR-001.md)
+
+### Scaffolding
+```
+projeto-final-grupo2-poliana-kaua-matheus/
+├── apps
+│   ├── audit
+│   ├── claims
+│   ├── donations
+│   ├── items
+├── core
+├── docs
+├── media
+├── static
+├── templates
+├── docker-compose.yml
+├── LICENSE
+├── manage.py
+├── README.md
+└── requirements.txt
+
+```

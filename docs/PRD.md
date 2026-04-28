@@ -93,7 +93,7 @@ Eu quero solicitar a reivindicação de um item listado como "Válido" ou "Armaz
 Para que eu possa provar minha posse com informações específicas e recuperar meu bem sem deslocamento.
     | Critérios de Aceite|
     :--
-    ✅ Dado que visualizo um item na lista pública com status "Válido" ou "Armazenado", quando clico em "Reivindicar", então acesso um formulário com campos obrigatórios: descrição detalhada, data aproximada da perda, local específico e características não visíveis publicamente (ex: marca interna, arranhão, número de série).
+    ✅ Dado que visualizo um item na lista pública com status "Válido" ou "Armazenado", quando clico em "Reivindicar", então acesso um formulário com campos obrigatórios: motivo da reivindicação, data aproximada da perda, local específico e características não visíveis publicamente (ex: marca interna, arranhão, número de série).
     ✅ Dado que envio a solicitação com sucesso, quando o administrador acessa a fila de reivindicações, então ele vê os detalhes completos da prova de posse, incluindo dados sensíveis que não estão visíveis para usuários comuns (ex: foto do item ou documento, características específicas)
     ✅ Dado que enviei uma reivindicação, quando acompanho o status em "Minhas Solicitações", então vejo se foi "Aprovada", "Rejeitada" ou "Em Análise", com justificativa do administrador quando aplicável.
 

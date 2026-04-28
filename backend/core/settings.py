@@ -108,18 +108,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Autenticação
 AUTHENTICATION_BACKENDS = [
-    'social_core.backends.suap.SuapOAuth2',
+    'core.backends.SuapOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Configurações SUAP OAuth2
 SOCIAL_AUTH_SUAP_KEY = os.getenv('SOCIAL_AUTH_SUAP_KEY')
 SOCIAL_AUTH_SUAP_SECRET = os.getenv('SOCIAL_AUTH_SUAP_SECRET')
-SOCIAL_AUTH_SUAP_SCOPE = ['identificacao', 'email', 'documentos_pessoais']
+SOCIAL_AUTH_SUAP_SCOPE = ['identificacao', 'email','documentos_pessoais']
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',

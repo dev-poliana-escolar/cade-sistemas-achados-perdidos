@@ -112,8 +112,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/items/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Configurações SUAP OAuth2

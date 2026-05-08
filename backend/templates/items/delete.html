@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Excluir Item
+    </h2>
+
+    <p>
+        Esta ação não pode ser desfeita.
+    </p>
+
+    <strong>
+        {{ item }}
+    </strong>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            class="danger"
+        >
+            Excluir
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

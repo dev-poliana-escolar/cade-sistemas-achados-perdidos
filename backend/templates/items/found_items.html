@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Itens Encontrados
+    </h2>
+
+    {% for item in itens %}
+
+        {% include 'partials/item_card.html' %}
+
+    {% empty %}
+
+        <p>
+            Nenhum item encontrado.
+        </p>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

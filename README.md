@@ -17,22 +17,25 @@ Qwen, NotebookLLM e Claude
 
 #### Scaffolding
 ```
-projeto-final-grupo2-poliana-kaua-matheus/
-├── apps
-│   ├── audit
-│   ├── claims
-│   ├── donations
-│   ├── items
-├── core
-├── docs
-├── media
-├── static
-├── templates
-├── docker-compose.yml
-├── LICENSE
-├── manage.py
-├── README.md
-└── requirements.txt
+projeto-final-grupo2-poliana-kaua-matheus
+    ├── backend
+    │   ├── apps
+    │   │   ├── audit
+    │   │   ├── claims
+    │   │   ├── donations
+    │   │   ├── items
+    |   ├── Dockerfile    
+    │   ├── core
+    │   ├── media
+    |   ├── requirements.txt
+    │   ├── static
+    │   └── templates
+    ├── docker-compose.yml
+    ├── docs
+    ├──  frontend
+    |    └── src
+    ├── LICENSE
+    └── README.md
 
 ```
 
@@ -76,3 +79,24 @@ projeto-final-grupo2-poliana-kaua-matheus/
     3. Documentação da API: https://suap.ifrn.edu.br/api/docs/
 
 
+4. Suba o docker compose
+    ```bash
+    sudo docker compose up -d
+    sudo docker ps -a # Exibição de todos os containers
+    ```
+    > Deve conter a imagem da aplicação e do postgrees
+
+    | CONTAINER ID  | IMAGE   |         COMMAND                  |CREATED      |  STATUS     |               PORTS  |   NAMES |
+    | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
+    | #             | projeto-final-grupo2-poliana-kaua-matheus-web  | "python manage.py ru…" |  10 days ago  |  Exited (0) 10 days ago      |   |     cade_web |
+    | # |  postgres:16  | "docker-entrypoint.s…"  |  10 days ago  |  Exited (0) 9 days ago |     |         cade_db|
+
+    4.1 Caso já possua:
+    ```bash
+    sudo docker start cade_db # Foque apenas neste por enquanto
+    sudo docker start cade_web 
+    ```
+    4.2 Dentro da pasta `/backend`, execute:
+    ```bash
+    python manage.py runserver
+    ```

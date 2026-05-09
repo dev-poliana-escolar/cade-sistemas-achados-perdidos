@@ -88,6 +88,57 @@
             background: #fee2e2;
         }
 
+        /* Basic table styles for items listings */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .items-table thead th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+            color: #111827;
+            font-weight: 600;
+        }
+
+        .items-table tbody td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+            color: #374151;
+        }
+
+        .items-table tbody tr:nth-child(even) td {
+            background: #ffffff;
+        }
+
+        .items-table tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-PENDENTE { background: #f59e0b; }
+        .status-VALIDO { background: #10b981; }
+        .status-ARMAZENADO { background: #6366f1; }
+        .status-DISPONIVEL_PARA_DOACAO { background: #06b6d4; }
+        .status-SORTEADO_AGUARDANDO_ENTREGA { background: #7c3aed; }
+        .status-REIVINDICADO_AGUARDANDO_ENTREGA { background: #ef4444; }
+        .status-ENTREGUE { background: #047857; }
+        .status-DOADO { background: #0ea5a4; }
+        .status-CANCELADO { background: #ef4444; }
+
     </style>
 
 </head>

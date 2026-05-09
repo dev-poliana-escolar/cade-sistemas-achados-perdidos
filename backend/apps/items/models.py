@@ -74,7 +74,7 @@ class Item(models.Model):
         related_name='itens_validados'
     )
     
-    data_encontro = models.DateTimeField()
+    data_encontro = models.DateField()
     data_cadastro = models.DateTimeField(auto_now_add=True)
     data_atualizacao = models.DateTimeField(auto_now=True)
     data_despacho = models.DateTimeField(null=True, blank=True)

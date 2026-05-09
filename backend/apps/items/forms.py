@@ -60,11 +60,11 @@ class ItemForm(forms.ModelForm):
                 }
             ),
 
-            "data_encontro": forms.DateTimeInput(
+            "data_encontro": forms.DateInput(
                 attrs={
-                    "type": "datetime-local"
+                    "type": "date"
                 },
-                format="%Y-%m-%dT%H:%M",
+                format="%Y-%m-%d",
             ),
         }
 
@@ -90,7 +90,7 @@ class ItemForm(forms.ModelForm):
 
         if self.instance.pk and self.instance.data_encontro:
             self.initial["data_encontro"] = (
-                self.instance.data_encontro.strftime("%Y-%m-%dT%H:%M")
+                self.instance.data_encontro.strftime("%Y-%m-%d")
             )
 
     def clean(self):

@@ -90,7 +90,11 @@ def item_create(request):
 
             item.cadastrado_por = request.user
 
+            # Force status to PENDENTE regardless of any submitted value
             item.status = Item.Status.PENDENTE
+
+            # Ensure dados_sensiveis reflects form intelligence (cleaner may have forced it)
+            item.dados_sensiveis = form.cleaned_data.get("dados_sensiveis", False)
 
             item.save()
 
@@ -156,6 +160,21 @@ def item_edit(request, pk):
 
         if form.is_valid():
 
+            # Ensure item is still editable (status lock)
+            if item.status != Item.Status.PENDENTE:
+
+                messages.error(
+                    request,
+                    (
+                        "Este item não pode mais "
+                        "ser editado."
+                    ),
+                )
+
+                return redirect(
+                    reverse("items:my_items")
+                )
+
             form.save()
 
             messages.success(
@@ -205,6 +224,18 @@ def item_cancel(request, pk):
         )
 
     if request.method == "POST":
+
+        # Re-check status before changing it to avoid races
+        if item.status != Item.Status.PENDENTE:
+
+            messages.error(
+                request,
+                "Este item não pode ser cancelado."
+            )
+
+            return redirect(
+                reverse("items:my_items")
+            )
 
         item.status = Item.Status.CANCELADO
 

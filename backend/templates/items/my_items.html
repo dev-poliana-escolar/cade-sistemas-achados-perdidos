@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Meus Cadastros
+    </h2>
+
+    {% for item in itens %}
+
+        {% include 'partials/items/items_card.html' %}
+
+        {% if item.status == "PENDENTE" %}
+
+            <a href="{% url 'items:edit' item.pk %}">
+                <button class="primary">
+                    Editar
+                </button>
+            </a>
+
+            <a href="{% url 'items:cancel' item.pk %}">
+                <button class="danger">
+                    Cancelar
+                </button>
+            </a>
+
+        {% endif %}
+
+        {% if user.is_staff %}
+
+            <a href="{% url 'items:delete' item.pk %}">
+                <button class="danger">
+                    Excluir
+                </button>
+            </a>
+
+        {% endif %}
+
+    {% empty %}
+
+        <p>
+            Você ainda não cadastrou itens.
+        </p>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

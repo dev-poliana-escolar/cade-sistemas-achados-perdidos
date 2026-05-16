@@ -1,0 +1,52 @@
+from django.urls import path
+
+from apps.items import views
+
+
+app_name = "items"
+
+
+urlpatterns = [
+
+    path(
+        "",
+        views.found_items,
+        name="found_items"
+    ),
+
+    path(
+        "donations/",
+        views.donation_items,
+        name="donation_items"
+    ),
+
+    path(
+        "my-items/",
+        views.my_items,
+        name="my_items"
+    ),
+
+    path(
+        "create/",
+        views.item_create,
+        name="create"
+    ),
+
+    path(
+        "<int:pk>/edit/",
+        views.item_edit,
+        name="edit"
+    ),
+
+    path(
+        "<int:pk>/cancel/",
+        views.item_cancel,
+        name="cancel"
+    ),
+
+    path(
+        "<int:pk>/delete/",
+        views.item_delete,
+        name="delete"
+    ),
+]

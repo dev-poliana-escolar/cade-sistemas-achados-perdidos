@@ -60,11 +60,11 @@ class ItemForm(forms.ModelForm):
                 }
             ),
 
-            "data_encontro": forms.DateTimeInput(
+            "data_encontro": forms.DateInput(
                 attrs={
-                    "type": "datetime-local"
+                    "type": "date"
                 },
-                format="%Y-%m-%dT%H:%M",
+                format="%Y-%m-%d",
             ),
         }
 
@@ -90,34 +90,25 @@ class ItemForm(forms.ModelForm):
 
         if self.instance.pk and self.instance.data_encontro:
             self.initial["data_encontro"] = (
-                self.instance.data_encontro.strftime("%Y-%m-%dT%H:%M")
+                self.instance.data_encontro.strftime("%Y-%m-%d")
             )
 
     def clean(self):
         cleaned_data = super().clean()
-        # Ensure image is present for new instances
-        imagem = cleaned_data.get("imagem")
 
-        if not imagem:
-            # If editing and an image already exists on the instance, allow no new upload
-            if not (self.instance and self.instance.pk and getattr(self.instance, "imagem")):
-                self.add_error(
-                    "imagem",
-                    "Envie uma foto do item."
-                )
-
-        # Handle color logic: when 'OUTRA' is selected, require and normalize the text field
         cor = cleaned_data.get("cor")
         outra_cor = cleaned_data.get("outra_cor")
 
         if cor == "OUTRA":
-            if not outra_cor or not outra_cor.strip():
+
+            if not outra_cor:
                 self.add_error(
                     "outra_cor",
                     "Informe a cor do item."
                 )
+
             else:
-                cleaned_data["cor"] = outra_cor.strip().upper()
+                cleaned_data["cor"] = outra_cor.upper()
 
         return cleaned_data
 
@@ -129,33 +120,4 @@ class ItemForm(forms.ModelForm):
                 "Informe um local válido."
             )
 
-        # normalize
-        return local.strip()
-
-    def clean_descricao(self):
-        descricao = self.cleaned_data.get("descricao")
-
-        if not descricao or len(descricao.strip()) < 3:
-            raise forms.ValidationError(
-                "Informe uma descrição válida."
-            )
-
-        descricao = descricao.strip()
-
-        # Detect sensitive keywords and flag the dados_sensiveis field
-        sensitive_keywords = [
-            "cpf",
-            "rg",
-            "matricula",
-            "cartao",
-            "senha",
-        ]
-
-        lower = descricao.lower()
-
-        if any(k in lower for k in sensitive_keywords):
-            # force the boolean field to True so the view/model can act accordingly
-            self.cleaned_data["dados_sensiveis"] = True
-
-        return descricao
-
+        return local

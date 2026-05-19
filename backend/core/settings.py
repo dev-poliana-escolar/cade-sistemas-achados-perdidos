@@ -31,7 +31,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Apps do CADÊ
-    'apps.items.apps.ItemsConfig',
+    'apps.items',
     'apps.claims',
     'apps.donations',
     'apps.audit',

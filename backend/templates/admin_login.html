@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Login Administrativo — CADÊ{% endblock %}
+
+{% block content %}
+<h1>Login Administrativo</h1>
+
+{% if messages %}
+<ul class="messages">
+  {% for message in messages %}
+  <li class="{{ message.tags }}">{{ message }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <div>
+    <label for="id_identifier">Usuário ou email</label>
+    <input type="text" name="identifier" id="id_identifier" required autofocus />
+  </div>
+  <div>
+    <label for="id_password">Senha</label>
+    <input type="password" name="password" id="id_password" required />
+  </div>
+  <button type="submit">Entrar</button>
+</form>
+
+<p><a href="{% url 'index' %}">Voltar</a></p>
+{% endblock %}

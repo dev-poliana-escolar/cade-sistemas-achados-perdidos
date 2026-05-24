@@ -108,8 +108,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Autenticação
 AUTHENTICATION_BACKENDS = [
-    'core.backends.SuapOAuth2',
     'django.contrib.auth.backends.ModelBackend',
+    'core.backends.SuapOAuth2',
 ]
 
 LOGIN_URL = '/'

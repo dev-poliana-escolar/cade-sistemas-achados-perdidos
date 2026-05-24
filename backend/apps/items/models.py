@@ -47,7 +47,7 @@ class Item(models.Model):
         choices=Categoria.choices
     )
 
-    descricao = models.TextField(blank=True)
+    descricao = models.TextField()
     cor = models.CharField(max_length=50)
     local_encontrado = models.CharField(max_length=200)
     observacoes = models.TextField(blank=True)

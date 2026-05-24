@@ -85,13 +85,8 @@ def item_create(request):
         )
 
         if form.is_valid():
-
             item = form.save(commit=False)
-
             item.cadastrado_por = request.user
-
-            item.status = Item.Status.PENDENTE
-
             item.save()
 
             messages.success(

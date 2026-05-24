@@ -23,6 +23,8 @@ class ItemForm(forms.ModelForm):
         ("OUTRA", "Outra"),
     ]
 
+    imagem = forms.ImageField(required=False, label="Foto do item")
+
     cor = forms.ChoiceField(
         choices=CORES,
         label="Cor predominante"
@@ -36,6 +38,17 @@ class ItemForm(forms.ModelForm):
                 "placeholder": "Ex: Bege claro"
             }
         )
+    )
+
+    data_encontro = forms.DateField(
+        required=True,
+        widget=forms.DateInput(
+            attrs={
+                "type": "date"
+            },
+            format="%Y-%m-%d",
+        ),
+        input_formats=["%Y-%m-%d"],
     )
 
     class Meta:
@@ -58,13 +71,6 @@ class ItemForm(forms.ModelForm):
                     "rows": 4,
                     "placeholder": "Descreva o item encontrado..."
                 }
-            ),
-
-            "data_encontro": forms.DateInput(
-                attrs={
-                    "type": "date"
-                },
-                format="%Y-%m-%d",
             ),
         }
 

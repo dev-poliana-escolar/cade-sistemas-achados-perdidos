@@ -25,7 +25,29 @@
         </button>
 
     </form>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var colorSelect = document.getElementById('id_cor');
+            var otherColorInput = document.getElementById('id_outra_cor');
+            if (!colorSelect || !otherColorInput) {
+                return;
+            }
+            var otherColorContainer = otherColorInput.closest('p');
+            if (!otherColorContainer) {
+                return;
+            }
+            function updateOtherColorDisplay() {
+                if (colorSelect.value === 'OUTRA') {
+                    otherColorContainer.style.display = 'block';
+                } else {
+                    otherColorContainer.style.display = 'none';
+                    otherColorInput.value = '';
+                }
+            }
+            updateOtherColorDisplay();
+            colorSelect.addEventListener('change', updateOtherColorDisplay);
+        });
+    </script>
 </div>
 
 {% endblock %}

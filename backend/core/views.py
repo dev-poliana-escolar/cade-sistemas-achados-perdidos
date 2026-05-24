@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
@@ -43,7 +44,7 @@ def admin_login(request):
             if user.is_active and (user.is_staff or user.is_superuser):
                 login(request, user)
                 messages.success(request, 'Bem vindo, acesso administrativo concedido.')
-                return redirect('/admin/')
+                return HttpResponseRedirect(reverse('items:admin_items'))
             else:
                 messages.error(request, 'Usuario ou senha inválidos.')
         else:

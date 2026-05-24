@@ -259,7 +259,7 @@ def item_delete(request, pk):
         )
 
         return redirect(
-            reverse("items:found_items")
+            reverse("items:admin_items")
         )
 
     return render(
@@ -268,5 +268,29 @@ def item_delete(request, pk):
         {
             "title": "Excluir Item",
             "item": item,
+        },
+    )
+
+
+@login_required
+def admin_items(request):
+    """
+    Painel administrativo: lista todos os itens cadastrados.
+
+    Acesso restrito a `is_staff` ou `is_superuser`.
+    """
+
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.error(request, "Você não possui permissão para acessar o painel administrativo.")
+        return redirect(reverse("items:found_items"))
+
+    itens = Item.objects.all()
+
+    return render(
+        request,
+        "items/admin_items.html",
+        {
+            "title": "Painel Administrativo — Itens",
+            "itens": itens,
         },
     )

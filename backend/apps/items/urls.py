@@ -27,6 +27,12 @@ urlpatterns = [
     ),
 
     path(
+        "admin-items/",
+        views.admin_items,
+        name="admin_items"
+    ),
+
+    path(
         "create/",
         views.item_create,
         name="create"

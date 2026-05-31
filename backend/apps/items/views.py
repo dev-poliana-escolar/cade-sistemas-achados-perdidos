@@ -288,7 +288,7 @@ def admin_items(request):
 
     return render(
         request,
-        "items/admin_items.html",
+        "admin/items/admin_items.html",
         {
             "title": "Painel Administrativo — Itens",
             "itens": itens,

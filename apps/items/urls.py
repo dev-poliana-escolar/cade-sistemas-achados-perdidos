@@ -1,5 +1,5 @@
 from django.urls import path
-
+from apps.items import api_views
 from apps.items import views
 
 
@@ -54,5 +54,11 @@ urlpatterns = [
         "<int:pk>/delete/",
         views.item_delete,
         name="delete"
+    ),
+
+    path(
+        "api/<int:pk>/",
+        api_views.api_item_detail,
+        name="api_item_detail"
     ),
 ]

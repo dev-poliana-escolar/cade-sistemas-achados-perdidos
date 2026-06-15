@@ -56,9 +56,22 @@ urlpatterns = [
         name="delete"
     ),
 
+    # API endpoints
     path(
         "api/<int:pk>/",
         api_views.api_item_detail,
         name="api_item_detail"
     ),
+    path(
+        "api/create/",
+        api_views.api_item_create,
+        name="api_item_create"
+    ),
+
+    path(
+        "api/<int:pk>/cancel/",
+        api_views.api_item_cancel,
+        name="api_item_cancel",
+    ),
+
 ]

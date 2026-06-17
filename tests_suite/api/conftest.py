@@ -2,10 +2,11 @@ import pytest
 
 from django.test import Client
 from django.contrib.auth.models import User
+from unittest.mock import Mock
 
 
 @pytest.fixture
-def test_user(db):
+def user(db):
     return User.objects.create_user(
         username="2026112345",
         email="aluno@ifrn.edu.br",
@@ -14,12 +15,14 @@ def test_user(db):
 
 
 @pytest.fixture
-def authenticated_client(test_user):
+def authenticated_client(user):
     client = Client()
-    client.force_login(test_user)
+    client.force_login(user)
     return client
 
-
 @pytest.fixture
-def anonymous_client():
-    return Client()
+def mock_api_auth(monkeypatch, user):
+    def mock_process_request(self, request):
+        request.user = user
+        return None
+    return user

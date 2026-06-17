@@ -6,7 +6,16 @@ from apps.items.models import Item
 from apps.items.forms import ItemForm
 
 
-@login_required
+def api_login_required(view_func):
+    """Garante que a resposta para usuários anônimos seja um JSON 401 """
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({"error": "Não autenticado"}, status=401)
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+
+@api_login_required
 def api_item_detail(request, pk):
     """
     Retorna um item em JSON.
@@ -28,7 +37,7 @@ def api_item_detail(request, pk):
         }
     )
 
-@login_required
+@api_login_required
 def api_item_create(request):
 
     if request.method != "POST":
@@ -60,7 +69,7 @@ def api_item_create(request):
         status=201,
     )
 
-@login_required
+@api_login_required
 def api_item_cancel(request, pk):
 
     if request.method != "POST":
@@ -95,3 +104,8 @@ def api_item_cancel(request, pk):
             "status": item.status,
         }
     )
+
+
+@pytest.fixture
+def anonymous_client():
+    return Client()

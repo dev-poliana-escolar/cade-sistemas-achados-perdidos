@@ -16,7 +16,7 @@ class TestItemAPI:
     def test_get_item_success(
         self,
         authenticated_client,
-        test_user
+        user
     ):
         item = Item.objects.create(
             categoria="ELETRONICO",
@@ -24,7 +24,7 @@ class TestItemAPI:
             cor="Preto",
             local_encontrado="Biblioteca",
             data_encontro=date.today(),
-            cadastrado_por=test_user,
+            cadastrado_por=user,
         )
 
         response = authenticated_client.get(
@@ -68,7 +68,7 @@ class TestItemAPI:
             )
         )
 
-        assert response.status_code == 302
+        assert response.status_code == 400
     
 
     # create item tests
@@ -117,13 +117,13 @@ class TestItemAPI:
             {}
         )
 
-        assert response.status_code == 302
+        assert response.status_code == 401
 
      # cancel item tests
     def test_cancel_item_success(
         self,
         authenticated_client,
-        test_user,
+        user,
     ):
         item = Item.objects.create(
             categoria="ELETRONICO",
@@ -132,7 +132,7 @@ class TestItemAPI:
             local_encontrado="Lab",
             data_encontro=date.today(),
             status=Item.Status.PENDENTE,
-            cadastrado_por=test_user,
+            cadastrado_por=user,
         )
 
         response = authenticated_client.post(
@@ -154,7 +154,7 @@ class TestItemAPI:
     def test_cancel_item_already_processed(
         self,
         authenticated_client,
-        test_user,
+        user,
     ):
         item = Item.objects.create(
             categoria="ELETRONICO",
@@ -163,7 +163,7 @@ class TestItemAPI:
             local_encontrado="Lab",
             data_encontro=date.today(),
             status=Item.Status.ENTREGUE,
-            cadastrado_por=test_user,
+            cadastrado_por=user,
         )
 
         response = authenticated_client.post(
@@ -177,7 +177,7 @@ class TestItemAPI:
     
     def test_cancel_item_anonymous(
         self,
-        test_user,
+        user,
         anonymous_client,
     ):
         item = Item.objects.create(
@@ -186,7 +186,7 @@ class TestItemAPI:
             cor="Preto",
             local_encontrado="Lab",
             data_encontro=date.today(),
-            cadastrado_por=test_user,
+            cadastrado_por=user,
         )
 
         response = anonymous_client.post(
@@ -196,4 +196,4 @@ class TestItemAPI:
             )
         )
 
-        assert response.status_code == 302
+        assert response.status_code == 401

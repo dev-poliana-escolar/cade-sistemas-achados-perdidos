@@ -33,29 +33,6 @@ Verifique se o container do banco de dados está ativo:
 docker ps
 ```
 
-Caso necessário:
-
-```bash
-docker compose up -d
-```
-
----
-
-## Iniciar o Servidor Django
-
-Em um terminal, execute:
-
-```bash
-python manage.py runserver
-```
-
-A aplicação deverá estar acessível em:
-
-```text
-http://127.0.0.1:8000
-```
----
-
 # Configuração Inicial do Ambiente
 
 Execute esta etapa apenas na primeira configuração da máquina.
@@ -76,31 +53,29 @@ Windows:
 
 ---
 
+## Iniciar o Servidor Django
+
+Em um terminal, execute:
+
+```bash
+python manage.py runserver
+```
+
+A aplicação deverá estar acessível em:
+
+```text
+http://127.0.0.1:8000
+```
+---
+
+
+
+---
+
 ## Instalar Dependências
 
 ```bash
-pip install pytest pytest-playwright pytest-html
-```
-
----
-
-## Instalar Navegadores do Playwright
-
-Para utilizar a versão leve do Chromium:
-
-```bash
-playwright install chromium-headless-shell
-playwright install firefox
-```
-
----
-
-## Instalar Dependências do Sistema Operacional
-
-Em distribuições Linux:
-
-```bash
-sudo npx playwright install-deps
+pip install -r requirements.txt
 ```
 
 ---

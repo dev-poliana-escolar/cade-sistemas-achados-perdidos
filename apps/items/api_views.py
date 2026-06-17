@@ -104,8 +104,3 @@ def api_item_cancel(request, pk):
             "status": item.status,
         }
     )
-
-
-@pytest.fixture
-def anonymous_client():
-    return Client()

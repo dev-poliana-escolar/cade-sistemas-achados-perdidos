@@ -6,26 +6,25 @@ on:
       - main
       - develop
       - test/api
-
   pull_request:
+    branches:
+      - main
+      - develop
+      - test/api
 
 jobs:
   tests:
-
     runs-on: ubuntu-latest
 
     services:
       postgres:
         image: postgres:16
-
         env:
           POSTGRES_DB: cade_db
           POSTGRES_USER: cade_user
           POSTGRES_PASSWORD: cade234
-
         ports:
           - 5432:5432
-
         options: >-
           --health-cmd="pg_isready -U cade_user -d cade_db"
           --health-interval=10s
@@ -34,21 +33,17 @@ jobs:
 
     env:
       SECRET_KEY: github-actions-secret-key
-      DEBUG: False
-
+      DEBUG: "False"
       DB_NAME: cade_db
       DB_USER: cade_user
       DB_PASSWORD: cade234
       DB_HOST: localhost
       DB_PORT: 5432
-
       ALLOWED_HOSTS: localhost,127.0.0.1
-
       SOCIAL_AUTH_SUAP_KEY: fake-key
       SOCIAL_AUTH_SUAP_SECRET: fake-secret
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,6 +51,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: "pip" # Ativa cache automático baseado no requirements.txt
 
       - name: Install dependencies
         run: |

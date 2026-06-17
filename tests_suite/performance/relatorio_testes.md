@@ -44,8 +44,100 @@ O endpoint de Achados e Perdidos está interceptando os Usuários Virtuais antes
 
 # Guia de Execução do Teste de Performance com Django e K6
 
+---
 
-## 📊 Passo 1: Executar o K6 e Exportar o Relatório JSON
+## 🔧 Passo 1: Instalar o K6
+
+Antes de executar o teste de performance, é necessário garantir que o K6 esteja instalado na máquina.
+
+### Verificar se o K6 já está instalado
+
+Abra o Git Bash e execute:
+
+```bash
+k6 version
+```
+
+Se o terminal retornar uma versão semelhante à exibida abaixo, a instalação já está concluída e você pode seguir para o próximo passo:
+
+```text
+k6 v0.49.0
+```
+
+---
+
+### Instalação utilizando Chocolatey
+
+Caso utilize o gerenciador de pacotes Chocolatey, execute o seguinte comando em um terminal com privilégios administrativos:
+
+```bash
+choco install k6
+```
+
+Após a instalação, feche e abra novamente o terminal e valide:
+
+```bash
+k6 version
+```
+
+---
+
+### Instalação utilizando Winget
+
+No PowerShell executado como administrador, execute:
+
+```powershell
+winget install k6.k6
+```
+
+Ao término da instalação, valide:
+
+```bash
+k6 version
+```
+
+---
+
+### Instalação Manual
+
+Caso prefira instalar manualmente:
+
+1. Acesse a documentação oficial de instalação do K6:
+   https://grafana.com/docs/k6/latest/set-up/install-k6/
+
+2. Baixe a versão compatível com seu sistema operacional.
+
+3. Extraia os arquivos e adicione o diretório que contém o executável `k6` às variáveis de ambiente do sistema.
+
+4. Abra um novo terminal e execute:
+
+```bash
+k6 version
+```
+
+---
+
+### Resultado Esperado
+
+A instalação será considerada bem-sucedida quando o comando:
+
+```bash
+k6 version
+```
+
+retornar uma saída semelhante a:
+
+```text
+k6 v0.49.0
+```
+
+Somente após essa validação prossiga para a execução do teste de performance.
+
+---
+
+
+
+## 📊 Passo 2: Executar o K6 e Exportar o Relatório JSON
 
 1. Abra uma **nova janela do Git Bash** (mantendo a janela do Django em execução).
 
@@ -106,6 +198,8 @@ O resultado deve ser inferior a:
 ```text
 500 ms
 ```
+
+
 ---
 
 ## Visão do Aluno

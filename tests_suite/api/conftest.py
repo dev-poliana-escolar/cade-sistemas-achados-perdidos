@@ -26,3 +26,8 @@ def mock_api_auth(monkeypatch, user):
         request.user = user
         return None
     return user
+
+@pytest.fixture
+def anonymous_client():
+    """Retorna um cliente HTTP do Django sem nenhum usuário autenticado."""
+    return Client()

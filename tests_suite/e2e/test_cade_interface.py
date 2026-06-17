@@ -2,7 +2,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 def test_fluxo_sistema_cade(page: Page):
-    page.goto("http://127.0.0.1:8000/")
+    page.goto(live_server.url)  # URL dinâmica (ex: http://localhost:53821)
     
     page.get_by_role("link", name="Entrar com SUAP").click()
     

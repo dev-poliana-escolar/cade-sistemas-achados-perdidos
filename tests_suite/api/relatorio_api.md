@@ -12,7 +12,8 @@ b. [Integração CI](#integração-ci)
 2. [Tecnologias utilizadas](#tecnologias-utilizadas)
 3. [Contrato da API](#contrato-da-api)
 5. [Endpoints Testados](#endpoints-testados)
-6. [Resultados Obtidos](#resultados-obtidos)
+6. [Resultados Obtidos](#resultados-obtidos)\
+a. [Atualizações](#atualizações)
 7. [Inteligência Artificial](#uso-de-inteligência-artificial)
 
 ---
@@ -120,6 +121,15 @@ tests_suite/api/test_items.py .........                                         
 ```
 
 Todos os cenários previstos foram executados com sucesso.
+
+---
+
+### Atualizações
+Esta seção documenta mudanças de comportamentos da API.
+
+1. [api_views.py](../../apps/items/api_views.py) : `@login_required` -> `@api_login_required`  
+    A mudança de `@login_required` (nativo do Django) para o `@api_login_required` (customizado) foi feita para garantir que a API responda no formato correto (JSON) quando um usuário não estiver autenticado.
+
 
 ---
 # Integração Contínua

@@ -37,7 +37,7 @@ jobs:
       DB_NAME: cade_db
       DB_USER: cade_user
       DB_PASSWORD: cade234
-      DB_HOST: localhost
+      DB_HOST: 127.0.0.1
       DB_PORT: 5432
       ALLOWED_HOSTS: localhost,127.0.0.1
       SOCIAL_AUTH_SUAP_KEY: fake-key
@@ -67,14 +67,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright Firefox Dependencies
         run: |
-          npx playwright install --with-deps
+          npx playwright install firefox --with-deps
 
       - name: Run migrations
         run: |
           python manage.py migrate
 
-      - name: Run tests
+      - name: Run test suite (API + E2E)
         run: |
-          pytest -v
+          pytest -v --browser firefox --screenshot=only-on-failure

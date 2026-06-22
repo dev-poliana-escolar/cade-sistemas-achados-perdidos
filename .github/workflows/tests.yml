@@ -69,8 +69,7 @@ jobs:
 
       - name: Install Playwright Firefox Dependencies
         run: |
-          npx playwright install firefox --with-deps
-
+          python -m playwright install --with-deps firefox
       - name: Run migrations
         run: |
           python manage.py migrate

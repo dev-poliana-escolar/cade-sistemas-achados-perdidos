@@ -20,11 +20,11 @@ urlpatterns = [
         name="donation_items"
     ),
 
-    path(
-        "my-items/",
-        views.my_items,
-        name="my_items"
-    ),
+    # path(
+    #     "my-items/",
+    #     views.my_items,
+    #     name="my_items"
+    # ),
 
     path(
         "admin-items/",
@@ -32,23 +32,23 @@ urlpatterns = [
         name="admin_items"
     ),
 
-    path(
-        "create/",
-        views.item_create,
-        name="create"
-    ),
+    # path(
+    #     "create/",
+    #     views.item_create,
+    #     name="create"
+    # ),
 
-    path(
-        "<int:pk>/edit/",
-        views.item_edit,
-        name="edit"
-    ),
+    # path(
+    #     "<int:pk>/edit/",
+    #     views.item_edit,
+    #     name="edit"
+    # ),
 
-    path(
-        "<int:pk>/cancel/",
-        views.item_cancel,
-        name="cancel"
-    ),
+    # path(
+    #     "<int:pk>/cancel/",
+    #     views.item_cancel,
+    #     name="cancel"
+    # ),
 
     path(
         "<int:pk>/delete/",

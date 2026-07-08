@@ -35,6 +35,9 @@ INSTALLED_APPS = [
     'apps.claims',
     'apps.donations',
     'apps.audit',
+    'apps.color',
+    'apps.category',
+    'apps.report',
 
     # OAuth2 SUAP
     'social_django',

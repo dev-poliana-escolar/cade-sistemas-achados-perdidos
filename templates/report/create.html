@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Reportar Item{% endblock %}
+
+{% block content %}
+
+<h2>Reportar Item</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h3>Dados do reporte</h3>
+    {{ reporte_form.as_p }}
+
+    <h3>Dados do item</h3>
+    {{ item_form.as_p }}
+
+    <button type="submit">Reportar</button>
+</form>
+
+{% endblock %}

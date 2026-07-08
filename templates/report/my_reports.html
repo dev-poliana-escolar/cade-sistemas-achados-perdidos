@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+Meus Reportes
+{% endblock %}
+
+{% block content %}
+
+<h2>Meus Reportes</h2>
+
+{% if reportes %}
+
+    {% for reporte in reportes %}
+        <div>
+            <h3>
+                {{ reporte.get_tipo_display }}
+            </h3>
+
+            <p>
+                Categoria:
+                {{ reporte.item.categoria }}
+            </p>
+
+            <p>
+                Cor:
+                {{ reporte.item.cor }}
+            </p>
+
+            <p>
+                Descrição:
+                {{ reporte.item.descricao }}
+            </p>
+
+            <p>
+                Local:
+                {{ reporte.local }}
+            </p>
+
+            <p>
+                Data:
+                {{ reporte.data }}
+            </p>
+        </div>
+
+        <hr>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>Nenhum reporte encontrado.</p>
+
+{% endif %}
+
+{% endblock %}

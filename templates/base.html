@@ -157,20 +157,18 @@
                 Itens para Doação
             </a>
 
-            <a href="#">
-                Minhas Reivindicações
-            </a>
-
-            <a href="{% url 'items:my_items' %}">
-                Meus Cadastros
-            </a>
+          
 
             <a href="#">
                 Itens Manifestados
             </a>
 
-            <a href="{% url 'items:create' %}">
-                Cadastrar Item
+            <a href="{% url 'report:create' %}">
+                Reportar
+            </a>
+
+            <a href="{% url 'report:my_reports' %}">
+                Meus Reportes
             </a>
 
             <a href="{% url 'logout' %}">Sair</a>

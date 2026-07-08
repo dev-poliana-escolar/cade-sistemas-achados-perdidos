@@ -6,11 +6,13 @@ from apps.color.models import Cor
 
 class Item(models.Model):
 
-
     class Status(models.TextChoices):
+        PERDIDO = "PERDIDO", "Perdido"
         AGUARDANDO_ENTREGA = "AGUARDANDO_ENTREGA", "Aguardando entrega"
         NO_ESTOQUE = "NO_ESTOQUE", "No estoque"
         DISPONIVEL_PARA_DOACAO = "DISPONIVEL_PARA_DOACAO", "Disponível para doação"
+        DEVOLVIDO = "DEVOLVIDO", "Devolvido"
+        DOADO = "DOADO", "Doado"
 
     categoria = models.ForeignKey(
         Categoria,
@@ -20,7 +22,6 @@ class Item(models.Model):
     status = models.CharField(
         max_length=30,
         choices=Status.choices,
-        default=Status.AGUARDANDO_ENTREGA,
     )
 
     cor = models.ForeignKey(

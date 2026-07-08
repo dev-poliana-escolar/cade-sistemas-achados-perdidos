@@ -6,50 +6,9 @@ class ItemForm(forms.ModelForm):
     """
     Formulário de cadastro e edição de itens encontrados.
     """
-
-    CORES = [
-        ("PRETO", "Preto"),
-        ("BRANCO", "Branco"),
-        ("AZUL", "Azul"),
-        ("VERMELHO", "Vermelho"),
-        ("VERDE", "Verde"),
-        ("AMARELO", "Amarelo"),
-        ("ROXO", "Roxo"),
-        ("ROSA", "Rosa"),
-        ("CINZA", "Cinza"),
-        ("MARROM", "Marrom"),
-        ("LARANJA", "Laranja"),
-        ("TRANSPARENTE", "Transparente"),
-        ("OUTRA", "Outra"),
-    ]
-
     imagem = forms.ImageField(required=False, label="Foto do item")
 
-    cor = forms.ChoiceField(
-        choices=CORES,
-        label="Cor predominante"
-    )
 
-    outra_cor = forms.CharField(
-        required=False,
-        label="Digite a cor",
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "Ex: Bege claro"
-            }
-        )
-    )
-
-    data_encontro = forms.DateField(
-        required=True,
-        widget=forms.DateInput(
-            attrs={
-                "type": "date"
-            },
-            format="%Y-%m-%d",
-        ),
-        input_formats=["%Y-%m-%d"],
-    )
 
     class Meta:
         model = Item
@@ -57,12 +16,9 @@ class ItemForm(forms.ModelForm):
         fields = [
             "imagem",
             "categoria",
-            "descricao",
             "cor",
-            "outra_cor",
-            "local_encontrado",
+            "descricao",
             "dados_sensiveis",
-            "data_encontro",
         ]
 
         widgets = {
@@ -72,16 +28,14 @@ class ItemForm(forms.ModelForm):
                     "placeholder": "Descreva o item encontrado..."
                 }
             ),
-        }
+        }       
 
         labels = {
             "imagem": "Foto do item",
             "categoria": "Categoria",
             "descricao": "Descrição",
             "cor": "Cor predominante",
-            "local_encontrado": "Local onde foi encontrado",
             "dados_sensiveis": "Contém dados sensíveis",
-            "data_encontro": "Data e hora do encontro",
         }
 
         help_texts = {
@@ -91,40 +45,15 @@ class ItemForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-        if self.instance.pk and self.instance.data_encontro:
-            self.initial["data_encontro"] = (
-                self.instance.data_encontro.strftime("%Y-%m-%d")
-            )
+    # def clean_descricao(self):
+    #     descricao = self.cleaned_data["descricao"].strip()
 
-    def clean(self):
-        cleaned_data = super().clean()
+    #     if len(descricao) < 10:
+    #         raise forms.ValidationError(
+    #             "Descreva melhor o item."
+    #         )
 
-        cor = cleaned_data.get("cor")
-        outra_cor = cleaned_data.get("outra_cor")
-
-        if cor == "OUTRA":
-
-            if not outra_cor:
-                self.add_error(
-                    "outra_cor",
-                    "Informe a cor do item."
-                )
-
-            else:
-                cleaned_data["cor"] = outra_cor.upper()
-
-        return cleaned_data
-
-    def clean_local_encontrado(self):
-        local = self.cleaned_data.get("local_encontrado")
-
-        if not local or len(local.strip()) < 3:
-            raise forms.ValidationError(
-                "Informe um local válido."
-            )
-
-        return local
+    #     return descricao
+    
 

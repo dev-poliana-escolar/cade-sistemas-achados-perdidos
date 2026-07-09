@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 
@@ -23,8 +23,6 @@ def my_reports(request):
     reportes= Reporte.objects.filter(usuario=request.user)
 
     return render( request, "report/my_reports.html", {"reportes": reportes})
-
-
 
 
 @login_required
@@ -103,3 +101,46 @@ def report_create(request):
             "item_form": item_form,
         },
     )
+
+@login_required
+def report_delete(request, id):
+    """
+    Deleta um reporte e o item associado a ele.
+    """
+
+    reporte = get_object_or_404(
+        Reporte,
+        id=id,
+        usuario=request.user,
+    )
+
+    if request.method=="POST":
+        if reporte.item.status not in [Item.Status.PERDIDO, Item.Status.AGUARDANDO_ENTREGA]:
+            messages.error(
+                request,
+                (
+                    "Não é possível deletar este reporte. "
+                    "O item associado já foi entregue ou doado."
+                ),
+            )
+            return redirect(reverse("report:my_reports"))
+    
+       
+        reporte.item.delete() 
+        messages.success(
+            request,
+            "Reporte deletado com sucesso!"
+        )
+
+        return redirect(reverse("report:my_reports"))
+        
+   
+    return render(
+        request,
+        "report/delete.html",
+        {
+            "title": "Deletar Reporte",
+            "reporte": reporte,
+        },
+    )
+    

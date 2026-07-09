@@ -1,0 +1,79 @@
+name: Django Tests
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - test/api
+  pull_request:
+    branches:
+      - main
+      - develop
+      - test/api
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: cade_db
+          POSTGRES_USER: cade_user
+          POSTGRES_PASSWORD: cade234
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U cade_user -d cade_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      SECRET_KEY: github-actions-secret-key
+      DEBUG: "False"
+      DB_NAME: cade_db
+      DB_USER: cade_user
+      DB_PASSWORD: cade234
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      ALLOWED_HOSTS: localhost,127.0.0.1
+      SOCIAL_AUTH_SUAP_KEY: fake-key
+      SOCIAL_AUTH_SUAP_SECRET: fake-secret
+      DJANGO_ALLOW_ASYNC_UNSAFE: "true"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set up Playwright cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/requirements.txt') }}-v2
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Firefox Dependencies
+        run: |
+          python -m playwright install --with-deps firefox
+      - name: Run migrations
+        run: |
+          python manage.py migrate
+
+      - name: Run test suite (API + E2E)
+        run: |
+          pytest -v --browser firefox --screenshot=only-on-failure

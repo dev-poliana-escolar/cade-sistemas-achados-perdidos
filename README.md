@@ -100,3 +100,9 @@ projeto-final-grupo2-poliana-kaua-matheus
     ```bash
     python manage.py runserver
     ```
+5. Testes e Qualidade de Software
+
+O projeto conta com uma suíte de testes automatizados cobrindo diferentes cenários e objetivos (E2E e Performance). Você pode acessar a documentação detalhada de cada um nos links abaixo:
+
+* [Guia de Execução dos Testes E2E (Playwright + Pytest)](./tests_suite/e2e/documentacao_e2e.md)
+* [Relatório e Guia de Testes de Performance (k6)](./tests_suite/performance/relatorio_testes.md)

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
 
 {% block title %}Reportar Item{% endblock %}
 
@@ -10,10 +11,10 @@
     {% csrf_token %}
 
     <h3>Dados do reporte</h3>
-    {{ reporte_form.as_p }}
+    {% bootstrap_form reporte_form %}
 
     <h3>Dados do item</h3>
-    {{ item_form.as_p }}
+    {% bootstrap_form item_form %}
 
     <button type="submit">Reportar</button>
 </form>

@@ -1,3 +1,5 @@
+{% load django_bootstrap5 %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -10,8 +12,10 @@
         {% endblock %}
     </title>
 
-    <style>
+    {% bootstrap_css %}
 
+    <style>
+        /* organizar em um arquivo separado*/ 
         body {
             font-family: Arial, sans-serif;
             background: #f3f4f6;
@@ -129,7 +133,7 @@
             color: white;
         }
 
-        .status-PENDENTE { background: #f59e0b; }
+        /*.status-PENDENTE { background: #f59e0b; }
         .status-VALIDO { background: #10b981; }
         .status-ARMAZENADO { background: #6366f1; }
         .status-DISPONIVEL_PARA_DOACAO { background: #06b6d4; }
@@ -137,7 +141,7 @@
         .status-REIVINDICADO_AGUARDANDO_ENTREGA { background: #ef4444; }
         .status-ENTREGUE { background: #047857; }
         .status-DOADO { background: #0ea5a4; }
-        .status-CANCELADO { background: #ef4444; }
+        .status-CANCELADO { background: #ef4444; }*/
 
     </style>
 
@@ -157,10 +161,8 @@
                 Itens para Doação
             </a>
 
-          
-
             <a href="#">
-                Itens Manifestados
+                Minhas Inscrições em Sorteios
             </a>
 
             <a href="{% url 'report:create' %}">
@@ -200,5 +202,6 @@
 
 </main>
 
+{% bootstrap_javascript %}
 </body>
 </html>

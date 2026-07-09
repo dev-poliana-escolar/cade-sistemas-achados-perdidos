@@ -10,41 +10,41 @@ Meus Reportes
 
 {% if reportes %}
 
-    {% for reporte in reportes %}
-        <div>
-            <h3>
-                {{ reporte.get_tipo_display }}
-            </h3>
+    
+        <table class="table">
+             <tr>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Cor</th>
+                    <th>Descrição</th>
+                    <th>Local</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+            </tr>
+            {% for reporte in reportes %}
+                <tr>
+                    <td>{{ reporte.get_tipo_display }}</td>
+                    <td>{{ reporte.item.categoria }}</td>
+                    <td>{{ reporte.item.cor }}</td>
+                    <td>{{ reporte.item.descricao }}</td>
+                    <td>{{ reporte.local }}</td>
+                    <td>{{ reporte.data }}</td>
 
-            <p>
-                Categoria:
-                {{ reporte.item.categoria }}
-            </p>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ reporte.id }}">
+                            Excluir
+                        </button>
+                    </td>
 
-            <p>
-                Cor:
-                {{ reporte.item.cor }}
-            </p>
+                </tr>
 
-            <p>
-                Descrição:
-                {{ reporte.item.descricao }}
-            </p>
+                {% include "partials/report/delete.html" %}
+            {% endfor %}
 
-            <p>
-                Local:
-                {{ reporte.local }}
-            </p>
+        </table>
 
-            <p>
-                Data:
-                {{ reporte.data }}
-            </p>
-        </div>
-
-        <hr>
-
-    {% endfor %}
+        
+    
 
 {% else %}
 

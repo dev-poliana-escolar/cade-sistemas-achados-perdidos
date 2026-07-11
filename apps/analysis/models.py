@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 class Analise(models.Model):
     class Status(models.TextChoices):
         PENDENTE = "PENDENTE", "Pendente"
+        EM_ANALISE = "EM_ANALISE", "Em Análise"
         CORRESPONDENCIA_ENCONTRADA = "CORRESPONDENCIA_ENCONTRADA", "Correspondência Encontrada"
         SEM_CORRESPONDENCIA = "SEM_CORRESPONDENCIA", "Sem Correspondência"
     

@@ -152,48 +152,25 @@
 <header>
     {% if user.is_authenticated %}
         <nav>
+            {% if user.is_staff %}
+                <!-- administradores -->
+                <a href="{% url 'analysis:dashboard' %}">Painel</a>
+                <a href="{% url 'analysis:pending_deliveries' %}">Entregas pendentes</a>
+                <a href="{% url 'analysis:pending_reports' %}">Reportes de Perda</a>
+            {% else %}
+                <!-- usuários comuns -->
+                <a href="{% url 'report:create' %}">Reportar</a>
+                <a href="{% url 'report:my_reports' %}">Meus Reportes</a>
+                <a href="#">Minhas Inscrições em Sorteios</a>
+            {% endif %}
 
-            <a href="{% url 'items:found_items' %}">
-                Itens Encontrados
-            </a>
-
-            <a href="{% url 'items:donation_items' %}">
-                Itens para Doação
-            </a>
-
-            <a href="#">
-                Minhas Inscrições em Sorteios
-            </a>
-
-            <a href="{% url 'report:create' %}">
-                Reportar
-            </a>
-
-            <a href="{% url 'report:my_reports' %}">
-                Meus Reportes
-            </a>
-
+            <!-- todos os usuários logados -->
+            <a href="{% url 'items:found_items' %}">Itens Encontrados</a>
+            <a href="{% url 'items:donation_items' %}">Itens para Doação</a>
+            <a href="#">Sorteios</a>
             <a href="{% url 'logout' %}">Sair</a>
         </nav>
     {% endif %}
-
-    {% if user.is_staff and user.is_authenticated %}
-        <a href="{% url 'analysis:dashboard' %}">
-            Painel Administrativo
-        </a>
-        <a href="{% url 'items:found_items' %}">
-            Itens Encontrados
-        </a>
-        <a href="{% url 'items:donation_items' %}">
-            Itens para Doação
-        </a>
-        <a href="#">
-            Sorteios
-        </a>
-
-        <a href="{% url 'logout' %}">Sair</a>
-
-    {%endif %}
 
 </header>
 

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ title }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-4">
+        Analisar Reporte
+    </h2>
+
+
+    <div class="row">
+
+        <!-- ITEM PERDIDO -->
+        <div class="col-md-5">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h4>Item perdido</h4>
+                </div>
+
+
+                <div class="card-body">
+
+                    <p>
+                        <strong>Categoria:</strong>
+                        {{ reporte.item.categoria }}
+                    </p>
+
+                    <p>
+                        <strong>Cor:</strong>
+                        {{ reporte.item.cor }}
+                    </p>
+
+                    <p>
+                        <strong>Descrição:</strong>
+                        {{ reporte.item.descricao }}
+                    </p>
+
+                    <p>
+                        <strong>Local informado:</strong>
+                        {{ reporte.local }}
+                    </p>
+
+                    <p>
+                        <strong>Data da perda:</strong>
+                        {{ reporte.data }}
+                    </p>
+
+                    {% if reporte.observacoes %}
+                        <p>
+                            <strong>Observações:</strong>
+                            {{ reporte.observacoes }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ITENS ENCONTRADOS -->
+        <div class="col-md-7">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                <h4>
+                    Possíveis correspondências
+                </h4>
+
+
+                {% for item in itens_encontrados %}
+
+                    <div class="card mb-3">
+
+                        <div class="card-body">
+
+
+                            <div class="form-check">
+
+                                <input
+                                    class="form-check-input"
+                                    type="radio"
+                                    name="item_encontrado"
+                                    value="{{ item.id }}"
+                                    id="item{{ item.id }}"
+                                >
+
+
+                                <label
+                                    class="form-check-label"
+                                    for="item{{ item.id }}"
+                                >
+
+                                    <h5>
+                                        {{ item.categoria }}
+                                    </h5>
+
+                                </label>
+
+                            </div>
+
+
+                            <p>
+                                <strong>Cor:</strong>
+                                {{ item.cor }}
+                            </p>
+
+
+                            <p>
+                                <strong>Descrição:</strong>
+                                {{ item.descricao }}
+                            </p>
+
+
+                            {% with reporte_encontrado=item.reportes.first %}
+
+                                {% if reporte_encontrado %}
+
+                                    <p>
+                                        <strong>Local encontrado:</strong>
+                                        {{ reporte_encontrado.local }}
+                                    </p>
+
+
+                                    <p>
+                                        <strong>Data encontrado:</strong>
+                                        {{ reporte_encontrado.data }}
+                                    </p>
+
+                                {% endif %}
+
+                            {% endwith %}
+
+
+                        </div>
+
+                    </div>
+
+
+
+ 
+
+                {% empty %}
+
+                    <div class="alert alert-warning">
+                        Nenhum item encontrado disponível para comparação.
+                    </div>
+
+                {% endfor %}
+                <hr>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Justificativa da análise
+                    </label>
+
+
+                    <textarea
+                        class="form-control"
+                        name="justificativa"
+                        rows="4"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Salvar análise
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

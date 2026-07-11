@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.audit',
     'apps.color',
     'apps.category',
+    'apps.analysis',
     'apps.report',
 
     # OAuth2 SUAP

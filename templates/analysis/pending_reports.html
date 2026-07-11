@@ -1,12 +1,12 @@
-{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
 
 {% block title %}
-Reportes para Analise
 {% endblock %}
 
 {% block content %}
 
-<table>
+<table class="table">
     <thead>
         <tr>
             <th>ID</th>
@@ -26,13 +26,18 @@ Reportes para Analise
                 <td>{{reporte.item.categoria}}</td>
                 <td>{{reporte.data}}</td>
                 <td>
+                    <a href="#">Iniciar analise</a>
                     <a href="#">Ver Detalhes</a>
                 </td>
             </tr>
+
+            
         {% empty %}
             <tr>
                 <td colspan="5">Nenhum reporte pendente encontrado.</td>
             </tr>
+
+            {%include "analysis/create.html"%}
         {% endfor %}
     </tbody>
 </table>

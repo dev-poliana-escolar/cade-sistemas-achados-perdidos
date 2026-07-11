@@ -4,10 +4,13 @@
 
 <div class="card">
 
-    <h2>Painel Administrativo — Itens</h2>
+   <h2>Painel Administrativo</h2>
 
-    {% include 'analysis/pending_reports.html' with itens=itens show_admin=True empty_message='Nenhum reporte de item perdido ainda.' %}
+    <h3>Entregas Pendentes</h3>
+    {% include "analysis/pending_deliveries.html" with reportes=entregas_pendentes %}
 
+    <h3>Reportes Pendentes de Análise</h3>
+    {% include "analysis/pending_reports.html" with reportes=reportes_perdidos %}
 </div>
 
 {% endblock %}

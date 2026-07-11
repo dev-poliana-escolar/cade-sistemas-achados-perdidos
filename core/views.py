@@ -44,7 +44,7 @@ def admin_login(request):
             if user.is_active and (user.is_staff or user.is_superuser):
                 login(request, user)
                 messages.success(request, 'Bem vindo, acesso administrativo concedido.')
-                return HttpResponseRedirect(reverse('analysis:pending_reports'))
+                return HttpResponseRedirect(reverse('analysis:dashboard'))
             else:
                 messages.error(request, 'Usuario ou senha inválidos.')
         else:

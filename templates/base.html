@@ -177,6 +177,24 @@
         </nav>
     {% endif %}
 
+    {% if user.is_staff and user.is_authenticated %}
+        <a href="{% url 'analysis:pending_reports' %}">
+            Reportes
+        </a>
+        <a href="{% url 'items:found_items' %}">
+            Itens Encontrados
+        </a>
+        <a href="{% url 'items:donation_items' %}">
+            Itens para Doação
+        </a>
+        <a href="#">
+            Sorteios
+        </a>
+
+        <a href="{% url 'logout' %}">Sair</a>
+
+    {%endif %}
+
 </header>
 
 <main>

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load django_bootstrap5 %}
 {% block content %}
 
 <div class="card">
@@ -8,9 +8,9 @@
         Itens Encontrados
     </h2>
 
-    {% for item in itens %}
+    {% for reporte in reportes %}
 
-        {% include 'partials/item_card.html' %}
+        {% include 'partials/items/card.html' %}
 
     {% empty %}
 

@@ -5,28 +5,26 @@ from django.urls import reverse
 
 from apps.items.forms import ItemForm
 from apps.items.models import Item
-
+from apps.report.models import Reporte
 
 @login_required
 def found_items(request):
     """
     Lista pública de itens encontrados.
-    Exibe apenas itens validados ou armazenados.
+    Exibe apenas itens armazenados.
     """
 
-    itens = Item.objects.filter(
-        status__in=[
-            Item.Status.AGUARDANDO_ENTREGA,
-            Item.Status.NO_ESTOQUE,
-        ]
-    )
+    reportes = Reporte.objects.filter(
+        tipo=Reporte.Tipo.ENCONTRADO,
+        item__status=Item.Status.NO_ESTOQUE,
+    ).select_related("item")
 
     return render(
         request,
         "items/found_items.html",
         {
             "title": "Itens Encontrados",
-            "itens": itens,
+            "reportes": reportes
         },
     )
 

@@ -24,6 +24,11 @@ urlpatterns=[
         "dashboard/",
         views.dashboard,
         name="dashboard"    
+    ),
+    path(
+        "create/<int:id>/",
+        views.create_analysis,
+        name="create"
     )
 
 ]

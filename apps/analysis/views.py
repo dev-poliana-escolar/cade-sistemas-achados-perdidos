@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from apps.report.models import Reporte
 from apps.analysis.forms import AnaliseForm
+from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
 
@@ -14,7 +15,8 @@ from django.contrib import messages
 def dashboard(request):
 
     reportes_perdidos = Reporte.objects.filter(
-        tipo=Reporte.Tipo.PERDIDO
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=True
     )
 
     entregas_pendentes = Reporte.objects.filter(
@@ -38,8 +40,9 @@ def pending_reports(request):
    """
    Lista todos os reportes de tipo PERDIDO 
    """
-   reportes_itens_perdidos = Reporte.objects.filter(tipo=Reporte.Tipo.PERDIDO)
-
+   reportes_itens_perdidos = Reporte.objects.filter(
+      tipo=Reporte.Tipo.PERDIDO
+   )
    return render (request, 'analysis/pending_reports.html', {
       "title": "Reportes pendentes de análise",
       'reportes':reportes_itens_perdidos
@@ -94,40 +97,71 @@ def confirm_delivered(request, id):
    return redirect("analysis:dashboard")
 
 
+@login_required
+@staff_member_required
+def create_analysis(request, id):
 
-# @login_required
-# @staff_member_required
-# def create_analysis(request, reporte_id):
-#    """
-#    Inicia uma analise de um reporte
-#    """
+   reporte = get_object_or_404(
+      Reporte,
+      id=id,
+      tipo=Reporte.Tipo.PERDIDO,
+   )
 
-#    reporte = get_object_or_404(
-#       Reporte,
-#       id=reporte_id
-#    )
+   analise, created = Analise.objects.get_or_create(
+      reporte=reporte,
+      administrador=request.user,
+      defaults={
+         "status": Analise.Status.EM_ANALISE,
+      }
+   )
 
-#    itens_encontrados = Reporte.objects.filter(
-#       tipo=Reporte.Tipo.ENCONTRADO,
-#       item__status=Reporte.Status.NO_ESTOQUE,
-#    )
+   itens_encontrados = Item.objects.filter(
+        status=Item.Status.NO_ESTOQUE,
+        categoria=reporte.item.categoria,
+   )
 
-#    if request.method == "POST":
-#       form= AnaliseForm(request.POST) 
+   if request.method == "POST":
 
-#       if form.is_valid():
-#          analise = form.save(commit=False)
-#          analise.administrador = request.user
-#          analise.save()
-#    else:
-#       form = AnaliseForm()
+      form = AnaliseForm(
+         request.POST,
+         instance=analise
+      )
 
-#    return render(request, 'analise/create.html', {'form': form})
+      form.fields["item_encontrado"].queryset = itens_encontrados
+
+      if form.is_valid():
+
+         analise = form.save(commit=False)
+
+         if analise.item_encontrado:
+               analise.status = Analise.Status.CORRESPONDENCIA_ENCONTRADA
+         else:
+               analise.status = Analise.Status.SEM_CORRESPONDENCIA
+
+         analise.save()
+
+         messages.success(
+               request,
+               "Análise finalizada com sucesso."
+         )
+
+         return redirect("analysis:dashboard")
+
+   else:
+      form = AnaliseForm(
+         instance=analise
+      )
+
+      form.fields["item_encontrado"].queryset = itens_encontrados
 
 
-
-
-
-   
-
-    
+   return render(
+        request,
+        "analysis/create.html",
+        {
+            "title": "Analisar reporte",
+            "form": form,
+            "reporte": reporte,
+            "itens_encontrados": itens_encontrados,
+        }
+    )

@@ -147,7 +147,6 @@ def comparar_itens(reporte_perdido: Reporte, item_candidato: Item) -> dict:
             penalidade += 25
 
         else:
-
             inconsistencias.append(
                 "Datas incompatíveis"
             )
@@ -232,7 +231,7 @@ def gerar_parecer(analise: Analise) -> Parecer:
     parecer, _ = Parecer.objects.update_or_create(
         analise=analise,
         defaults={
-            "score_confianca": score_final,
+            "score_correspondencia": score_final,
             "convergencias": resultados,
             "inconsistencias": [],
             "recomendacao": recomendacao,

@@ -20,48 +20,72 @@
         <div class="col-md-5">
 
             <div class="card shadow-sm">
-
                 <div class="card-header">
                     <h4>Item perdido</h4>
                 </div>
 
+                <div class="card-body">
+                    <p><strong>Categoria:</strong> {{ reporte.item.categoria }}</p>
+                    <p><strong>Cor:</strong> {{ reporte.item.cor }}</p>
+                    <p><strong>Descrição:</strong> {{ reporte.item.descricao }}</p>
+                    <p><strong>Local informado:</strong> {{ reporte.local }}</p>
+                    <p><strong>Data da perda:</strong> {{ reporte.data }}</p>
+
+                    {% if reporte.observacoes %}
+                        <p><strong>Observações:</strong> {{ reporte.observacoes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- BOTÃO / RESULTADO DO PARECER -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h4>Parecer automático</h4>
+                </div>
 
                 <div class="card-body">
 
-                    <p>
-                        <strong>Categoria:</strong>
-                        {{ reporte.item.categoria }}
-                    </p>
+                    {% if parecer %}
 
-                    <p>
-                        <strong>Cor:</strong>
-                        {{ reporte.item.cor }}
-                    </p>
-
-                    <p>
-                        <strong>Descrição:</strong>
-                        {{ reporte.item.descricao }}
-                    </p>
-
-                    <p>
-                        <strong>Local informado:</strong>
-                        {{ reporte.local }}
-                    </p>
-
-                    <p>
-                        <strong>Data da perda:</strong>
-                        {{ reporte.data }}
-                    </p>
-
-                    {% if reporte.observacoes %}
                         <p>
-                            <strong>Observações:</strong>
-                            {{ reporte.observacoes }}
+                            <strong>Score de confiança:</strong>
+                            {{ parecer.score_confianca }}/100
                         </p>
+
+                        <p>
+                            <strong>Recomendação:</strong>
+                            {{ parecer.recomendacao }}
+                        </p>
+
+                        <p class="text-muted small">
+                            Gerado em {{ parecer.data_criacao }}
+                        </p>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_parecer">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                Gerar parecer novamente
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <p class="text-muted">
+                            Nenhum parecer gerado ainda.
+                        </p>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_parecer">
+                            <button type="submit" class="btn btn-primary">
+                                Gerar parecer
+                            </button>
+                        </form>
+
                     {% endif %}
 
                 </div>
-
             </div>
 
         </div>
@@ -76,54 +100,60 @@
                 {% csrf_token %}
 
 
-                <h4>
+                <h4 class="mb-3">
                     Possíveis correspondências
                 </h4>
 
+                {% for comparacao in comparacoes %}
 
-                {% for item in itens_encontrados %}
+                    {% with item=comparacao.item %}
 
-                    <div class="card mb-3">
+                    <div class="card mb-3 {% if forloop.first %}border-success border-2{% endif %}">
 
                         <div class="card-body">
 
+                            <div class="d-flex justify-content-between">
 
-                            <div class="form-check">
+                                <div class="form-check">
 
-                                <input
-                                    class="form-check-input"
-                                    type="radio"
-                                    name="item_encontrado"
-                                    value="{{ item.id }}"
-                                    id="item{{ item.id }}"
-                                >
+                                    <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="item_encontrado"
+                                        value="{{ item.id }}"
+                                        id="item{{ item.id }}"
+                                    >
 
+                                    <label
+                                        class="form-check-label"
+                                        for="item{{ item.id }}"
+                                    >
+                                        <h5 class="mb-0">
+                                            {{ item.categoria }}
+                                        </h5>
+                                    </label>
 
-                                <label
-                                    class="form-check-label"
-                                    for="item{{ item.id }}"
-                                >
+                                </div>
 
-                                    <h5>
-                                        {{ item.categoria }}
-                                    </h5>
-
-                                </label>
+                                {% if forloop.first %}
+                                    <span class="badge bg-success">
+                                        ⭐ Melhor correspondência
+                                    </span>
+                                {% endif %}
 
                             </div>
 
+                            <hr>
 
                             <p>
                                 <strong>Cor:</strong>
                                 {{ item.cor }}
                             </p>
 
-
                             <p>
                                 <strong>Descrição:</strong>
                                 {{ item.descricao }}
                             </p>
-
 
                             {% with reporte_encontrado=item.reportes.first %}
 
@@ -134,9 +164,8 @@
                                         {{ reporte_encontrado.local }}
                                     </p>
 
-
                                     <p>
-                                        <strong>Data encontrado:</strong>
+                                        <strong>Data:</strong>
                                         {{ reporte_encontrado.data }}
                                     </p>
 
@@ -144,14 +173,68 @@
 
                             {% endwith %}
 
+                            <hr>
+
+                            <strong>Score</strong>
+
+                            <div class="progress mb-3">
+
+                                <div
+                                    class="progress-bar"
+                                    role="progressbar"
+                                    style="width: {{ comparacao.score }}%;"
+                                    aria-valuenow="{{ comparacao.score }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100">
+
+                                    {{ comparacao.score }}%
+
+                                </div>
+
+                            </div>
+
+                            {% if comparacao.convergencias %}
+
+                                <p class="mb-1">
+
+                                    <strong>Convergências</strong>
+
+                                </p>
+
+                                {% for texto in comparacao.convergencias %}
+
+                                    <span class="badge bg-success mb-1">
+                                        {{ texto }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% endif %}
+
+                            {% if comparacao.inconsistencias %}
+
+                                <p class="mt-3 mb-1">
+
+                                    <strong>Inconsistências</strong>
+
+                                </p>
+
+                                {% for texto in comparacao.inconsistencias %}
+
+                                    <span class="badge bg-danger mb-1">
+                                        {{ texto }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% endif %}
 
                         </div>
 
                     </div>
 
+                    {% endwith %}
 
-
- 
 
                 {% empty %}
 

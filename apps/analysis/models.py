@@ -53,7 +53,7 @@ class Parecer(models.Model):
         related_name="parecer"
     )
 
-    score_confianca = models.PositiveSmallIntegerField(
+    score_correspondencia = models.PositiveSmallIntegerField(
         help_text="Score de 0 a 100 indicando o grau de confiança na melhor correspondência encontrada."
     )
 
@@ -82,4 +82,4 @@ class Parecer(models.Model):
         verbose_name_plural = "Pareceres"
 
     def __str__(self):
-        return f"Parecer da análise #{self.analise_id} (score {self.score_confianca})"
+        return f"Parecer da análise #{self.analise_id} (score {self.score_correspondencia})"

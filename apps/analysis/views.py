@@ -6,6 +6,7 @@ from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
+from apps.analysis.services import gerar_parecer
 
 
 # Create your views here.
@@ -97,71 +98,73 @@ def confirm_delivered(request, id):
    return redirect("analysis:dashboard")
 
 
+
 @login_required
 @staff_member_required
 def create_analysis(request, id):
-
    reporte = get_object_or_404(
-      Reporte,
-      id=id,
-      tipo=Reporte.Tipo.PERDIDO,
+      Reporte, id=id, tipo=Reporte.Tipo.PERDIDO,
    )
 
    analise, created = Analise.objects.get_or_create(
       reporte=reporte,
       administrador=request.user,
-      defaults={
-         "status": Analise.Status.EM_ANALISE,
-      }
+      defaults={"status": Analise.Status.EM_ANALISE},
    )
 
    itens_encontrados = Item.objects.filter(
-        status=Item.Status.NO_ESTOQUE,
-        categoria=reporte.item.categoria,
+      status=Item.Status.NO_ESTOQUE,
+      categoria=reporte.item.categoria,
    )
 
+   parecer = getattr(analise, "parecer", None)
+
    if request.method == "POST":
+      action = request.POST.get("action")
 
-      form = AnaliseForm(
-         request.POST,
-         instance=analise
-      )
+      if action == "gerar_parecer":
+         parecer = gerar_parecer(analise)
+         messages.success(request, "Parecer gerado com sucesso.")
+         return redirect("analysis:create", id=reporte.id)
 
+      form = AnaliseForm(request.POST, instance=analise)
       form.fields["item_encontrado"].queryset = itens_encontrados
 
       if form.is_valid():
-
          analise = form.save(commit=False)
-
-         if analise.item_encontrado:
-               analise.status = Analise.Status.CORRESPONDENCIA_ENCONTRADA
-         else:
-               analise.status = Analise.Status.SEM_CORRESPONDENCIA
-
-         analise.save()
-
-         messages.success(
-               request,
-               "Análise finalizada com sucesso."
+         analise.status = (
+               Analise.Status.CORRESPONDENCIA_ENCONTRADA
+               if analise.item_encontrado
+               else Analise.Status.SEM_CORRESPONDENCIA
          )
-
+         analise.save()
+         messages.success(request, "Análise finalizada com sucesso.")
          return redirect("analysis:dashboard")
-
    else:
-      form = AnaliseForm(
-         instance=analise
-      )
-
+      form = AnaliseForm(instance=analise)
       form.fields["item_encontrado"].queryset = itens_encontrados
 
+   comparacoes = []
+
+   if parecer:
+
+      for resultado in parecer.convergencias:
+
+         resultado["item"] = itens_encontrados.get(
+               id=resultado["item_candidato_id"]
+         )
+
+         comparacoes.append(resultado)
 
    return render(
-        request,
-        "analysis/create.html",
-        {
-            "title": "Analisar reporte",
-            "form": form,
-            "reporte": reporte,
-            "itens_encontrados": itens_encontrados,
-        }
-    )
+      request,
+      "analysis/create.html",
+      {
+         "title": "Analisar reporte",
+         "form": form,
+         "reporte": reporte,
+         "itens_encontrados": itens_encontrados,
+         "parecer": parecer,
+         "comparacoes": comparacoes,
+      },
+   )

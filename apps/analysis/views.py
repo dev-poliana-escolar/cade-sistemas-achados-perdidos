@@ -164,19 +164,19 @@ def create_analysis(request, id):
    comparacoes = []
 
    if parecer:
+      ids_avaliados = [c["item_candidato_id"] for c in parecer.convergencias]
 
-      itens = {
+      itens_avaliados = {
          item.id: item
-         for item in itens_encontrados
+         for item in Item.objects.filter(id__in=ids_avaliados)
       }
 
       for resultado in parecer.convergencias:
+         item_candidato = itens_avaliados.get(resultado["item_candidato_id"])
          
-         resultado["item"] = itens[
-            resultado["item_candidato_id"]
-         ]
-
-         comparacoes.append(resultado)
+         if item_candidato:
+            resultado["item"] = item_candidato
+            comparacoes.append(resultado)
 
    return render(
       request,

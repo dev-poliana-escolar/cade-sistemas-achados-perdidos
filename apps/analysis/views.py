@@ -7,6 +7,7 @@ from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
 from apps.analysis.services import gerar_parecer
+from apps.analysis import ai as analysis_ai
 
 
 # Create your views here.
@@ -126,6 +127,22 @@ def create_analysis(request, id):
          parecer = gerar_parecer(analise)
          messages.success(request, "Parecer gerado com sucesso.")
          return redirect("analysis:create", id=reporte.id)
+      if action == "gerar_parecer_ia":
+         try:
+            parecer = analysis_ai.gerar_parecer_ia(analise)
+            messages.success(request, "Parecer gerado com IA com sucesso.")
+            return redirect("analysis:create", id=reporte.id)
+         except RuntimeError:
+            parecer = gerar_parecer(analise)
+            
+            messages.warning(
+               request,
+               (
+                     "A IA não pôde ser utilizada. "
+                     "Foi gerado um parecer heurístico."
+               ),
+            )
+            return redirect("analysis:create", id=reporte.id)
 
       form = AnaliseForm(request.POST, instance=analise)
       form.fields["item_encontrado"].queryset = itens_encontrados
@@ -148,11 +165,16 @@ def create_analysis(request, id):
 
    if parecer:
 
-      for resultado in parecer.convergencias:
+      itens = {
+         item.id: item
+         for item in itens_encontrados
+      }
 
-         resultado["item"] = itens_encontrados.get(
-               id=resultado["item_candidato_id"]
-         )
+      for resultado in parecer.convergencias:
+         
+         resultado["item"] = itens[
+            resultado["item_candidato_id"]
+         ]
 
          comparacoes.append(resultado)
 

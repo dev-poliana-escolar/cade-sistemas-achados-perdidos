@@ -114,8 +114,7 @@ def create_analysis(request, id):
    )
 
    itens_encontrados = Item.objects.filter(
-      status=Item.Status.NO_ESTOQUE,
-      categoria=reporte.item.categoria,
+      status=Item.Status.NO_ESTOQUE
    )
 
    parecer = getattr(analise, "parecer", None)
@@ -172,11 +171,13 @@ def create_analysis(request, id):
       }
 
       for resultado in parecer.convergencias:
-         item_candidato = itens_avaliados.get(resultado["item_candidato_id"])
-         
-         if item_candidato:
-            resultado["item"] = item_candidato
-            comparacoes.append(resultado)
+         item = itens_avaliados.get(resultado["item_candidato_id"])
+
+         if item is None:
+            continue
+
+         resultado["item"] = item
+         comparacoes.append(resultado)
 
    return render(
       request,

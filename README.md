@@ -3,106 +3,208 @@
 
 # SUMÁRIO
 1. [Sobre o sistema](#cade-sistemas-de-achados-e-perdidos)
-2. [Como executar o sistema](#como-executar-o-projeto)
+2. [Como executar o sistema](#como-executar-o-sistema)
 
 # CADE: Sistemas de achados e perdidos
 
-O sistema de achados e perdidos do Instituto Federal do Rio Grande do Norte (IFRN), campus Parnamirim, tem como objetivo permitir que alunos e servidores consultem e cadastrem itens perdidos de forma remota, além de automatizar os processos de doação e o ciclo de vida dos objetos encontrados.
+O sistema de achados e perdidos do Instituto Federal do Rio Grande do Norte (IFRN), campus Parnamirim, tem como objetivo permitir que alunos e servidores consultem itens encontrados e realizem  reportes de itens perdidos de forma remota, além de automatizar os processos de doação e o ciclo de vida dos objetos encontrados.
 
 #### Ferramentas de IA utilizadas:
-Qwen, NotebookLLM e Claude
+1. Para apoio: Qwen, NotebookLLM, Claude, ChatGPT
+2. Para consumo de API: Gemini (https://aistudio.google.com/)
 
 #### Documento de decisão de arquitetura:
 [Architecture Decision Record](docs/ADR-001.md)
 
 #### Scaffolding
-```
+
+```text
 projeto-final-grupo2-poliana-kaua-matheus
-    ├── backend
-    │   ├── apps
-    │   │   ├── audit
-    │   │   ├── claims
-    │   │   ├── donations
-    │   │   ├── items
-    |   ├── Dockerfile    
-    │   ├── core
-    │   ├── media
-    |   ├── requirements.txt
-    │   ├── static
-    │   └── templates
-    ├── docker-compose.yml
-    ├── docs
-    ├──  frontend
-    |    └── src
-    ├── LICENSE
-    └── README.md
+├── apps
+│   ├── analysis
+│   ├── category
+│   ├── color
+│   ├── donations
+│   ├── items
+│   └── report
+├── core
+├── docs
+│   └── images
+│       └── diagrams
+├── media
+│   └── items
+├── static
+├── templates
+│   ├── admin
+│   ├── analysis
+│   ├── items
+│   ├── partials
+│   │   ├── analysis
+│   │   ├── items
+│   │   └── report
+│   └── report
+├── tests_suite
+│   ├── api
+│   │   └── schemas
+│   ├── e2e
+│   └── performance
+├── .dockerignore
+├── .env.example
+├── docker-compose.yml
+├── Dockerfile
+├── manage.py
+├── requirements.txt
+├── LICENSE
+└── README.md
+```
+# Como executar o sistema?
 
+O projeto pode ser executado de duas formas:
+
+- **Com Docker (recomendado)**: não é necessário instalar Python nem PostgreSQL localmente.
+- **Localmente**: utilizando um ambiente virtual Python e um banco PostgreSQL executando em Docker.
+
+---
+
+## Opção 1 - Executando com Docker (recomendado)
+
+### 1. Crie o arquivo `.env`
+
+```bash
+cp .env.example .env
 ```
 
-# Como executar o sistema
+Configure as variáveis de ambiente.
 
-1. Crie um ambiente virtual
-    ```bash
-    python -m venv .venv
-    ```
-    **Ative o ambiente virtual**\
-    1.1 Se estiver no Windows
-    ```bash
-    source .venv/Scripts/activate
-    ``` 
-    1.2 Se estiver no Linux
-    ```bash
-    source .venv/bin/activate
-    ```
+> Para execução via Docker, altere:
+```text
+ DB_HOST=db
+```
 
-2. Instale as depedências
-    ```bash
-    cd backend # entre na pasta designada ao backend
-    pip install -r requirements.txt
-    ```
-3. Crie o arquivo `.env`
-    ```bash
-    touch .env
-    ```
-    
-    -  Copie o arquivo `.env.example` e o **configure** o seu `.env`!
+Configure também:
 
-    3.1 Crie a secret key para o Django
-    ```bash
-    python -c 'import secrets; print(secrets.token_hex(32))' # cole a chave gerada
-    ```
-    - Defina a senha do banco de dados como: `cade234`
+- `SECRET_KEY`
+- `GEMINI_API_KEY`
+- Credenciais do SUAP:  
+    1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django     
+    2. Repositorio oficial: https://github.com/ifrn-oficial/cliente_suap_django     
+    3. Documentação da API: https://suap.ifrn.edu.br/api/docs/
 
-    **3.2 Consumo do SUAP/API**\
-    1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django
-    2. Repositorio oficial: https://github.com/ifrn-oficial/cliente_suap_django
+---
+
+### 2. Execute o projeto
+
+```bash
+sudo docker compose up --build
+```
+
+Na primeira execução a imagem será construída automaticamente.
+
+Depois disso, basta executar:
+
+```bash
+sudo docker compose up
+```
+
+A aplicação ficará disponível em:
+
+```
+http://localhost:8000
+```
+
+Para finalizar:
+
+```bash
+sudo docker compose down
+```
+
+### 3. Para criar super usuário
+> Enquanto os containers rodam, você pode em outro terminal:
+```bash
+sudo docker compose exec web python manage.py createsuperuser
+```
+
+---
+
+## Opção 2 - Executando localmente
+
+### 1. Crie o ambiente virtual
+
+```bash
+python -m venv .venv
+```
+
+#### Linux
+
+```bash
+source .venv/bin/activate
+```
+
+#### Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+---
+
+### 2. Instale as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 3. Configure o `.env`
+
+```bash
+cp .env.example .env
+```
+
+Para execução local utilize:
+
+```text
+DB_HOST=localhost
+```
+
+Configure também:
+
+- `SECRET_KEY`
+- `GEMINI_API_KEY`
+- Credenciais do SUAP:  
+    1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django     
+    2. Repositorio oficial: https://github.com/ifrn-oficial/cliente_suap_django     
     3. Documentação da API: https://suap.ifrn.edu.br/api/docs/
 
 
-4. Suba o docker compose
-    ```bash
-    sudo docker compose up -d
-    sudo docker ps -a # Exibição de todos os containers
-    ```
-    > Deve conter a imagem da aplicação e do postgrees
+---
 
-    | CONTAINER ID  | IMAGE   |         COMMAND                  |CREATED      |  STATUS     |               PORTS  |   NAMES |
-    | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
-    | #             | projeto-final-grupo2-poliana-kaua-matheus-web  | "python manage.py ru…" |  10 days ago  |  Exited (0) 10 days ago      |   |     cade_web |
-    | # |  postgres:16  | "docker-entrypoint.s…"  |  10 days ago  |  Exited (0) 9 days ago |     |         cade_db|
+### 4. Inicie o PostgreSQL
 
-    4.1 Caso já possua:
-    ```bash
-    sudo docker start cade_db # Foque apenas neste por enquanto
-    sudo docker start cade_web 
-    ```
-    4.2 Dentro da pasta `/backend`, execute:
-    ```bash
-    python manage.py runserver
-    ```
-5. Testes e Qualidade de Software
+```bash
+sudo docker compose up -d db
+```
 
-O projeto conta com uma suíte de testes automatizados cobrindo diferentes cenários e objetivos (E2E e Performance). Você pode acessar a documentação detalhada de cada um nos links abaixo:
+ou
 
-* [Guia de Execução dos Testes E2E (Playwright + Pytest)](./tests_suite/e2e/documentacao_e2e.md)
-* [Relatório e Guia de Testes de Performance (k6)](./tests_suite/performance/relatorio_testes.md)
+```bash
+sudo docker start cade_db
+```
+
+---
+
+### 5. Execute a aplicação
+
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+---
+
+# Testes e Qualidade de Software
+
+O projeto conta com uma suíte de testes automatizados cobrindo diferentes cenários e objetivos.
+> wip(13/07/2026) : No momento estão desatualizados 
+- [Guia de Execução dos Testes E2E (Playwright + Pytest)](./tests_suite/e2e/documentacao_e2e.md)
+- [Relatório e Guia de Testes de Performance (k6)](./tests_suite/performance/relatorio_testes.md)

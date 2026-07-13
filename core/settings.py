@@ -34,9 +34,7 @@ INSTALLED_APPS = [
 
     # Apps do CADÊ
     'apps.items',
-    'apps.claims',
     'apps.donations',
-    'apps.audit',
     'apps.color',
     'apps.category',
     'apps.analysis',

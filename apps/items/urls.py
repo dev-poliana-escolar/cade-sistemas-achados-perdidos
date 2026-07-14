@@ -26,11 +26,11 @@ urlpatterns = [
     #     name="my_items"
     # ),
 
-    path(
-        "admin-items/",
-        views.admin_items,
-        name="admin_items"
-    ),
+    # path(
+    #     "admin-items/",
+    #     views.admin_items,
+    #     name="admin_items"
+    # ),
 
     # path(
     #     "create/",

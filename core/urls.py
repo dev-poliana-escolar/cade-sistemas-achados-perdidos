@@ -32,6 +32,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('items/', include('apps.items.urls', namespace='apps.items')),
     path('report/', include('apps.report.urls', namespace='report')),
+    path('analysis/', include('apps.analysis.urls', namespace='analysis')),
     path('logout/',views.logout_view, name='logout'),
 ]
 

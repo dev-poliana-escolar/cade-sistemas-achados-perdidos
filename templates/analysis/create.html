@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ title }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-4">
+        Analisar Reporte
+    </h2>
+
+
+    <div class="row">
+
+        <!-- ITEM PERDIDO -->
+        <div class="col-md-5">
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4>Item perdido - {{reporte.id}}</h4>
+                </div>
+
+                <div class="card-body">
+                    <p><strong>Categoria:</strong> {{ reporte.item.categoria }}</p>
+                    <p><strong>Cor:</strong> {{ reporte.item.cor }}</p>
+                    <p><strong>Descrição:</strong> {{ reporte.item.descricao }}</p>
+                    <p><strong>Local informado:</strong> {{ reporte.local }}</p>
+                    <p><strong>Data da perda:</strong> {{ reporte.data }}</p>
+
+                    {% if reporte.observacoes %}
+                        <p><strong>Observações:</strong> {{ reporte.observacoes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- BOTÃO / RESULTADO DO PARECER -->
+            <div class="card shadow-sm mt-3">
+                <div class="card-header">
+                    <h4>Feedback rápido</h4>
+                </div>
+
+                <div class="card-body">
+
+                    {% if parecer %}
+
+                        <p>
+                            <strong>Score de correspondência:</strong>
+                            {{ parecer.score_correspondencia }}/100
+                        </p> 
+
+                        <p>
+                            <strong>Recomendação:</strong>
+                            {{ parecer.recomendacao }}
+                        </p>
+
+                        <p class="text-muted small">
+                            Gerado em {{ parecer.data_criacao }}
+                        </p>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_parecer">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                Gerar parecer novamente
+                            </button>
+                        </form>
+
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_parecer_ia">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                Gerar parecer com IA
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <p class="text-muted">
+                            Nenhum parecer gerado ainda.
+                        </p>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_parecer">
+                            <button type="submit" class="btn btn-primary">
+                                Gerar parecer
+                            </button>
+                        </form>
+
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <!-- ITENS ENCONTRADOS -->
+        <div class="col-md-7">
+
+            <form method="post">
+
+                {% csrf_token %}
+
+
+                <h4 class="mb-3">
+                    Possíveis correspondências
+                </h4>
+
+                {% for comparacao in comparacoes %}
+
+                    {% with item=comparacao.item %}
+
+                    <div class="card mb-3 {% if forloop.first %}border-success border-2{% endif %}">
+
+                        <div class="card-body">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div class="form-check">
+
+                                    <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="item_encontrado"
+                                        value="{{ item.id }}"
+                                        id="item{{ item.id }}"
+                                    >
+
+                                    <label
+                                        class="form-check-label"
+                                        for="item{{ item.id }}"
+                                    >
+                                        <h5 class="mb-0">
+                                            {{ item.categoria }}
+                                        </h5>
+                                    </label>
+
+                                </div>
+
+
+                            </div>
+
+                            <hr>
+
+                            <p>
+                                <strong>Cor:</strong>
+                                {{ item.cor }}
+                            </p>
+
+                            <p>
+                                <strong>Descrição:</strong>
+                                {{ item.descricao }}
+                            </p>
+
+                            {% with reporte_encontrado=item.reportes.first %}
+
+                                {% if reporte_encontrado %}
+
+                                    <p>
+                                        <strong>Local encontrado:</strong>
+                                        {{ reporte_encontrado.local }}
+                                    </p>
+
+                                    <p>
+                                        <strong>Data:</strong>
+                                        {{ reporte_encontrado.data }}
+                                    </p>
+
+                                {% endif %}
+
+                            {% endwith %}
+
+                            <hr>
+
+                            <strong>Score</strong>
+
+                            <div class="progress mb-3">
+
+                                <div
+                                    class="progress-bar"
+                                    role="progressbar"
+                                    style="width: {{ comparacao.score }}%;"
+                                    aria-valuenow="{{ comparacao.score }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100">
+
+                                    {{ comparacao.score }}%
+
+                                </div>
+
+                            </div>
+
+                            {% if comparacao.convergencias %}
+
+                                <p class="mb-1">
+
+                                    <strong>Convergências</strong>
+
+                                </p>
+
+                                {% for texto in comparacao.convergencias %}
+
+                                    <span class="badge bg-success mb-1">
+                                        {{ texto }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% endif %}
+
+                            {% if comparacao.inconsistencias %}
+
+                                <p class="mt-3 mb-1">
+
+                                    <strong>Inconsistências</strong>
+
+                                </p>
+
+                                {% for texto in comparacao.inconsistencias %}
+
+                                    <span class="badge bg-danger mb-1">
+                                        {{ texto }}
+                                    </span>
+
+                                {% endfor %}
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    {% endwith %}
+
+
+                {% empty %}
+
+                    <div class="alert alert-warning">
+                        Nenhum item encontrado disponível para comparação.
+                    </div>
+
+                {% endfor %}
+                <hr>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Justificativa da análise
+                    </label>
+
+
+                    <textarea
+                        class="form-control"
+                        name="justificativa"
+                        rows="4"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Salvar análise
+                </button>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

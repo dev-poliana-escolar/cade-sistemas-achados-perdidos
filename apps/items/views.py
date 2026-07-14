@@ -5,28 +5,26 @@ from django.urls import reverse
 
 from apps.items.forms import ItemForm
 from apps.items.models import Item
-
+from apps.report.models import Reporte
 
 @login_required
 def found_items(request):
     """
     Lista pública de itens encontrados.
-    Exibe apenas itens validados ou armazenados.
+    Exibe apenas itens armazenados.
     """
 
-    itens = Item.objects.filter(
-        status__in=[
-            Item.Status.AGUARDANDO_ENTREGA,
-            Item.Status.NO_ESTOQUE,
-        ]
-    )
+    reportes = Reporte.objects.filter(
+        tipo=Reporte.Tipo.ENCONTRADO,
+        item__status=Item.Status.NO_ESTOQUE,
+    ).select_related("item")
 
     return render(
         request,
         "items/found_items.html",
         {
             "title": "Itens Encontrados",
-            "itens": itens,
+            "reportes": reportes
         },
     )
 
@@ -99,25 +97,3 @@ def item_delete(request, pk):
     )
 
 
-@login_required
-def admin_items(request):
-    """
-    Painel administrativo: lista todos os itens cadastrados.
-
-    Acesso restrito a `is_staff` ou `is_superuser`.
-    """
-
-    if not request.user.is_staff and not request.user.is_superuser:
-        messages.error(request, "Você não possui permissão para acessar o painel administrativo.")
-        return redirect(reverse("items:found_items"))
-
-    itens = Item.objects.all()
-
-    return render(
-        request,
-        "admin/items/admin_items.html",
-        {
-            "title": "Painel Administrativo — Itens",
-            "itens": itens,
-        },
-    )

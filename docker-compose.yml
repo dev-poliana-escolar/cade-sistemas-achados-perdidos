@@ -14,7 +14,6 @@ services:
   web:
     build: .
     container_name: cade_web
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:

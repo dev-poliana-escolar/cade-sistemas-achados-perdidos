@@ -1,0 +1,63 @@
+{%  extends 'base.html'%}
+{% load django_bootstrap5 %}
+
+{% block title %}
+Entregas Pendentes
+{% endblock %}
+
+{% block content %}
+
+<h2>Entregas Pendentes</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Categoria</th>
+            <th>Cor</th>
+            <th>Descrição</th>
+            <th>Data</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for reporte in reportes %}
+
+        <tr>
+            <td>{{ reporte.id }}</td>
+            <td>{{ reporte.item.categoria }}</td>
+            <td>{{ reporte.item.cor }}</td>
+            <td>{{ reporte.item.descricao }}</td>
+            <td>{{ reporte.data }}</td>
+
+            <td>
+                <form
+                    method="post"
+                    action="{% url 'analysis:confirm_delivered' reporte.id %}"
+                >
+                    {% csrf_token %}
+
+                    <button class="btn btn-success btn-sm">
+                        Confirmar entrega
+                    </button>
+
+                </form>
+            </td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="6">
+                Nenhuma entrega pendente.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+</table>
+
+{% endblock %}

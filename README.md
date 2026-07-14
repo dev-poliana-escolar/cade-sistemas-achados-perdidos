@@ -84,6 +84,9 @@ Configure as variáveis de ambiente.
 Configure também:
 
 - `SECRET_KEY`
+    ```bash
+    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+    ```
 - `GEMINI_API_KEY`
 - Credenciais do SUAP:  
     1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django     
@@ -171,6 +174,9 @@ DB_HOST=localhost
 Configure também:
 
 - `SECRET_KEY`
+    ```bash
+    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+    ```
 - `GEMINI_API_KEY`
 - Credenciais do SUAP:  
     1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django     

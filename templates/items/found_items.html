@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Itens Encontrados
+    </h2>
+
+    {% for reporte in reportes %}
+
+        {% include 'partials/items/card.html' %}
+
+    {% empty %}
+
+        <p>
+            Nenhum item encontrado.
+        </p>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

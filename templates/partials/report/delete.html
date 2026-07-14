@@ -1,0 +1,87 @@
+<div
+    class="modal fade"
+    id="deleteModal{{ reporte.id }}"
+    tabindex="-1"
+    aria-labelledby="deleteModalLabel{{ reporte.id }}"
+    aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5
+                    class="modal-title"
+                    id="deleteModalLabel{{ reporte.id }}">
+                    Confirmar exclusão
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Fechar">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+                    Tem certeza que deseja excluir este reporte?
+                </p>
+
+                <hr>
+
+                <p>
+                    <strong>Tipo:</strong>
+                    {{ reporte.get_tipo_display }}
+                </p>
+
+                <p>
+                    <strong>Categoria:</strong>
+                    {{ reporte.item.categoria }}
+                </p>
+
+                <p>
+                    <strong>Cor:</strong>
+                    {{ reporte.item.cor }}
+                </p>
+
+                <p>
+                    <strong>Descrição:</strong>
+                    {{ reporte.item.descricao }}
+                </p>
+
+                <p class="text-danger mb-0">
+                    Esta ação não poderá ser desfeita.
+                </p>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+
+                <form
+                    method="POST"
+                    action="{% url 'report:delete' id=reporte.id %}">
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger">
+                        Excluir
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>

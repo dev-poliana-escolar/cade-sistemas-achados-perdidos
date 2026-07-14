@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Itens para Doação
+    </h2>
+
+    {% for item in itens %}
+
+        {% include 'partials/item_card.html' %}
+
+    {% empty %}
+
+        <p>
+            Nenhum item disponível para doação.
+        </p>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

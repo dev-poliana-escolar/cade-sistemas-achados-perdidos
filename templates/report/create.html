@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}Reportar Item{% endblock %}
+
+{% block content %}
+
+<h2>Reportar Item</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <h3>Dados do reporte</h3>
+    {% bootstrap_form reporte_form %}
+
+    <h3>Dados do item</h3>
+    {% bootstrap_form item_form %}
+
+    <button type="submit">Reportar</button>
+</form>
+
+{% endblock %}

@@ -1,9 +1,0 @@
-{% extends 'base.html' %}
-
-{% block title %}Dashboard — CADÊ{% endblock %}
-
-{% block content %}
-<h1>Olá, {{ user.get_full_name|default:user.username }}!</h1>
-<p>Bem-vindo ao CADÊ.</p>
-<a href="{% url 'logout' %}">Sair</a>
-{% endblock %}

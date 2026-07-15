@@ -87,7 +87,15 @@
                             {% csrf_token %}
                             <input type="hidden" name="action" value="gerar_parecer">
                             <button type="submit" class="btn btn-primary">
-                                Gerar parecer
+                                Gerar parecer sem AI
+                            </button>
+                        </form>
+
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="gerar_parecer_ia">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                Gerar parecer com IA
                             </button>
                         </form>
 

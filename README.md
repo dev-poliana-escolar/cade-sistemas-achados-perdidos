@@ -86,6 +86,8 @@ Configure também:
 - `SECRET_KEY`
     ```bash
     python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+    # ou
+    python -c "import secrets; print(secrets.token_hex(32))"
     ```
 - `GEMINI_API_KEY`
 - Credenciais do SUAP:  
@@ -125,8 +127,6 @@ sudo docker compose down
 > Enquanto os containers rodam, você pode em outro terminal:
 ```bash
 sudo docker compose exec web python manage.py createsuperuser
-# ou
-python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
 ---

@@ -103,11 +103,21 @@ sudo docker compose up --build
 ```
 
 Na primeira execução a imagem será construída automaticamente.
-
-Depois disso, basta executar:
-
-```bash
-sudo docker compose up
+> Deve aparecer:
+```text
+cade_web  | System check identified some issues:
+cade_web  | 
+cade_web  | WARNINGS:
+cade_web  | ?: (staticfiles.W004) The directory '/app/static' in the STATICFILES_DIRS setting does not exist.
+cade_web  | Criando categorias...
+cade_web  | Criando cores...
+cade_web  | Criando administrador...
+cade_web  | Administrador criado.
+cade_web  | Usuário: admin
+cade_web  | Senha: admin123
+cade_web  | Criando itens...
+cade_web  | Criando reportes...
+cade_web  | 
 ```
 
 A aplicação ficará disponível em:
@@ -120,6 +130,11 @@ Para finalizar:
 
 ```bash
 sudo docker compose down
+```
+Depois disso, para ativar basta executar:
+
+```bash
+sudo docker compose up
 ```
 
 ### 3. Para criar super usuário

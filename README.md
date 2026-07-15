@@ -85,7 +85,8 @@ Configure também:
 
 - `SECRET_KEY`
     ```bash
-    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' #se tiver python, se não, não precisa
+    python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+    # execute se tiver python e django na sua máquina, se não, não precisa
     ```
 - `GEMINI_API_KEY` (obrigatório para utilizar a AI)
 - Credenciais do SUAP:  

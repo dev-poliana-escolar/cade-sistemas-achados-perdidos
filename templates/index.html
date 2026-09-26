@@ -3,14 +3,26 @@
 {% block title %}CADÊ — Achados e Perdidos IFRN{% endblock %}
 
 {% block content %}
-<h1>CADÊ</h1>
-<h2>Sistema de Achados e Perdidos — IFRN Campus Parnamirim</h2>
-<p>Acesse com sua conta institucional do IFRN para continuar.</p>
-<a href="{% url 'social:begin' 'suap' %}">Entrar com SUAP</a>
-<p>Se você é administrador do sistema, use o login nativo:</p>
-<a href="{% url 'admin_login' %}">Login administrativo</a>
+<div class="card" style="max-width: 650px; margin: 2rem auto; text-align: center;">
+    <h1 style="font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; color: #111827;">CADÊ</h1>
+    <h2 style="font-size: 1.15rem; font-weight: 600; color: #4b5563; margin-bottom: 1.5rem;">Sistema de Achados e Perdidos — IFRN Campus Parnamirim</h2>
+    <p style="color: #6b7280; margin-bottom: 1.5rem;">Acesse com sua conta institucional do IFRN para continuar.</p>
+    
+    <div style="margin-bottom: 2rem;">
+        <a href="{% url 'social:begin' 'suap' %}" class="primary" style="font-size: 1.05rem; padding: 0.75rem 1.75rem; text-decoration: none; border-radius: 8px; display: inline-block;">
+            Entrar com SUAP
+        </a>
+    </div>
 
-{% if user.is_authenticated and user.is_staff %}
-<p><a href="{% url 'analysis:dashboard' %}">Abrir painel administrativo</a></p>
-{% endif %}
+    <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; font-size: 0.9rem; color: #6b7280;">
+        <p style="margin-bottom: 0.5rem;">Se você é administrador do sistema, use o login nativo:</p>
+        <a href="{% url 'admin_login' %}" style="color: #2563eb; font-weight: 600; text-decoration: underline;">Login administrativo</a>
+    </div>
+
+    {% if user.is_authenticated and user.is_staff %}
+    <div style="margin-top: 1.5rem;">
+        <a href="{% url 'analysis:dashboard' %}" style="font-size: 0.9rem; color: #4b5563; font-weight: 600; text-decoration: underline;">Abrir painel administrativo</a>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

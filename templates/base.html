@@ -1,10 +1,11 @@
 {% load django_bootstrap5 %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
         {% block title %}
@@ -13,183 +14,52 @@
     </title>
 
     {% bootstrap_css %}
-
-    <style>
-        /* organizar em um arquivo separado*/ 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f3f4f6;
-            margin: 0;
-        }
-
-        header {
-            background: #111827;
-            padding: 1rem 2rem;
-        }
-
-        nav {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        main {
-            padding: 2rem;
-        }
-
-        .card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-        }
-
-        .item {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        button {
-            padding: .7rem 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .messages {
-            margin-bottom: 1rem;
-        }
-
-        .message {
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: .5rem;
-        }
-
-        .success {
-            background: #dcfce7;
-        }
-
-        .error {
-            background: #fee2e2;
-        }
-
-        /* Basic table styles for items listings */
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.95rem;
-        }
-
-        .items-table thead th {
-            text-align: left;
-            padding: 0.75rem 1rem;
-            background: #f9fafb;
-            border-bottom: 2px solid #e5e7eb;
-            color: #111827;
-            font-weight: 600;
-        }
-
-        .items-table tbody td {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
-            color: #374151;
-        }
-
-        .items-table tbody tr:nth-child(even) td {
-            background: #ffffff;
-        }
-
-        .items-table tbody tr:hover td {
-            background: #f8fafc;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        /*.status-PENDENTE { background: #f59e0b; }
-        .status-VALIDO { background: #10b981; }
-        .status-ARMAZENADO { background: #6366f1; }
-        .status-DISPONIVEL_PARA_DOACAO { background: #06b6d4; }
-        .status-SORTEADO_AGUARDANDO_ENTREGA { background: #7c3aed; }
-        .status-REIVINDICADO_AGUARDANDO_ENTREGA { background: #ef4444; }
-        .status-ENTREGUE { background: #047857; }
-        .status-DOADO { background: #0ea5a4; }
-        .status-CANCELADO { background: #ef4444; }*/
-
-    </style>
-
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
+<a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
 
 <header>
-    {% if user.is_authenticated %}
-        <nav>
-            {% if user.is_staff %}
-                <!-- administradores -->
-                <a href="{% url 'analysis:dashboard' %}">Painel</a>
-                <a href="{% url 'analysis:pending_deliveries' %}">Entregas pendentes</a>
-                <a href="{% url 'analysis:pending_reports' %}">Reportes de Perda</a>
-            {% else %}
-                <!-- usuários comuns -->
-                <a href="{% url 'report:my_reports' %}">Meus Reportes</a>
-                <a href="#">Minhas Inscrições em Sorteios</a>
-            {% endif %}
+    <div class="header-container">
+        <a href="{% if user.is_authenticated %}{% url 'items:found_items' %}{% else %}/{% endif %}" class="brand-link" aria-label="Cadê? Sistema de Achados e Perdidos">
+            Cadê?
+        </a>
 
-            <!-- todos os usuários logados -->
-            <a href="{% url 'items:found_items' %}">Itens Encontrados</a>
-            <a href="{% url 'report:create' %}">Reportar</a>
-            <a href="{% url 'items:donation_items' %}">Itens para Doação</a>
-            <a href="#">Sorteios</a>
-            <a href="{% url 'logout' %}">Sair</a>
-        </nav>
-    {% endif %}
+        {% if user.is_authenticated %}
+            <nav aria-label="Navegação principal">
+                {% if user.is_staff %}
+                    <!-- administradores -->
+                    <a href="{% url 'analysis:dashboard' %}">Painel</a>
+                    <a href="{% url 'analysis:pending_deliveries' %}">Entregas pendentes</a>
+                    <a href="{% url 'analysis:pending_reports' %}">Reportes de Perda</a>
+                {% else %}
+                    <!-- usuários comuns -->
+                    <a href="{% url 'report:my_reports' %}">Meus Reportes</a>
+                    <a href="#">Minhas Inscrições em Sorteios</a>
+                {% endif %}
 
+                <!-- todos os usuários logados -->
+                <a href="{% url 'items:found_items' %}">Itens Encontrados</a>
+                <a href="{% url 'report:create' %}">Reportar</a>
+                <a href="{% url 'items:donation_items' %}">Itens para Doação</a>
+                <a href="#">Sorteios</a>
+                <a href="{% url 'logout' %}">Sair</a>
+            </nav>
+        {% endif %}
+    </div>
 </header>
 
-<main>
+<main id="main-content" role="main">
 
     {% if messages %}
-
-        <div class="messages">
-
+        <div class="messages" role="alert" aria-live="polite">
             {% for message in messages %}
-
                 <div class="message {{ message.tags }}">
                     {{ message }}
                 </div>
-
             {% endfor %}
-
         </div>
-
     {% endif %}
 
     {% block content %}

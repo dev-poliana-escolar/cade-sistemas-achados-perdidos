@@ -1,42 +1,35 @@
-
-
-
 {% block content %}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tipo</th>
-            <th>Categoria do Item</th>
-            <th>Data e Hora da Perda</th>
-            
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        
-        {% for reporte in reportes %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
             <tr>
-                <td>{{ reporte.id }}</td>
-                <td>{{ reporte.tipo }}</td>
-                <td>{{reporte.item.categoria}}</td>
-                <td>{{reporte.data}}</td>
-                <td>
-                    <a href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
-                    <a href="#">Ver Detalhes</a>
-                </td>
+                <th scope="col">ID</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Categoria do Item</th>
+                <th scope="col">Data e Hora da Perda</th>
+                <th scope="col">Ações</th>
             </tr>
-            
+        </thead>
+        <tbody>
+            {% for reporte in reportes %}
+                <tr>
+                    <td><strong>#{{ reporte.id }}</strong></td>
+                    <td>{{ reporte.tipo }}</td>
+                    <td>{{ reporte.item.categoria }}</td>
+                    <td>{{ reporte.data }}</td>
+                    <td>
+                        <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm">Ver Detalhes</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">Nenhum reporte pendente encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-            
-        {% empty %}
-            <tr>
-                <td colspan="5">Nenhum reporte pendente encontrado.</td>
-            </tr>
-
-           
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock%}
+{% endblock %}

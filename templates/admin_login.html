@@ -3,28 +3,30 @@
 {% block title %}Login Administrativo — CADÊ{% endblock %}
 
 {% block content %}
-<h1>Login Administrativo</h1>
+<div class="card" style="max-width: 480px; margin: 2rem auto;">
+  <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center;">Login Administrativo</h1>
 
-{% if messages %}
-<ul class="messages">
-  {% for message in messages %}
-  <li class="{{ message.tags }}">{{ message }}</li>
-  {% endfor %}
-</ul>
-{% endif %}
+  {% if messages %}
+  <ul class="messages" role="alert" aria-live="polite">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 
-<form method="post">
-  {% csrf_token %}
-  <div>
-    <label for="id_identifier">Usuário ou email</label>
-    <input type="text" name="identifier" id="id_identifier" required autofocus />
-  </div>
-  <div>
-    <label for="id_password">Senha</label>
-    <input type="password" name="password" id="id_password" required />
-  </div>
-  <button type="submit">Entrar</button>
-</form>
+  <form method="post" style="display: flex; flex-direction: column; gap: 1.25rem;">
+    {% csrf_token %}
+    <div>
+      <label for="id_identifier" style="display: block; font-weight: 600; margin-bottom: 0.35rem;">Usuário ou email</label>
+      <input type="text" name="identifier" id="id_identifier" required autofocus style="width: 100%; padding: 0.65rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box;" />
+    </div>
+    <div>
+      <label for="id_password" style="display: block; font-weight: 600; margin-bottom: 0.35rem;">Senha</label>
+      <input type="password" name="password" id="id_password" required style="width: 100%; padding: 0.65rem 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box;" />
+    </div>
+    <button type="submit" class="primary" style="width: 100%; margin-top: 0.5rem;">Entrar</button>
+  </form>
 
-<p><a href="{% url 'index' %}">Voltar</a></p>
+  <p style="margin-top: 1.5rem; text-align: center;"><a href="{% url 'index' %}" style="color: var(--text-muted); text-decoration: underline;">Voltar ao início</a></p>
+</div>
 {% endblock %}

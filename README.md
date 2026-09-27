@@ -11,7 +11,7 @@ O sistema de achados e perdidos do Instituto Federal do Rio Grande do Norte (IFR
 
 #### Ferramentas de IA utilizadas:
 1. Para apoio: Qwen, NotebookLLM, Claude, ChatGPT
-2. Para consumo de API: Gemini (https://aistudio.google.com/)
+2. Para consumo de API: Groq (https://console.groq.com/)
 
 #### Documento de decisão de arquitetura:
 [Architecture Decision Record](docs/ADR-001.md)
@@ -82,13 +82,14 @@ Configure as variáveis de ambiente.
 ```
 
 Configure também:
-
+> Execute se tiver python e django na sua máquina, se não, pule este passo
 - `SECRET_KEY`
     ```bash
     python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
-    # execute se tiver python e django na sua máquina, se não, não precisa
+    #ou 
+    python -c "import secrets; print(secrets.token_hex(32))"
     ```
-- `GEMINI_API_KEY` (obrigatório para utilizar a AI)
+- `GROQ_API_KEY` (obrigatório para utilizar a AI)
 - Credenciais do SUAP:  
     1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django     
     2. Repositorio oficial: https://github.com/ifrn-oficial/cliente_suap_django     
@@ -195,7 +196,7 @@ Configure também:
     # ou
     python -c "import secrets; print(secrets.token_hex(32))"
     ```
-- `GEMINI_API_KEY`
+- `GROQ_API_KEY`
 - Credenciais do SUAP:  
     1. Repositório que serviu de base: https://github.com/sergiodantasz/cliente-suap-django     
     2. Repositorio oficial: https://github.com/ifrn-oficial/cliente_suap_django     

@@ -10,9 +10,15 @@ from apps.report.models import Reporte
 
 class Command(BaseCommand):
     help = "Popula o banco com dados iniciais"
-
+    
     def handle(self, *args, **kwargs):
 
+        if Item.objects.exists():
+            self.stdout.write(
+                self.style.WARNING("Banco já possui dados. Seed ignorado.")
+            )
+            return
+         
         self.stdout.write(self.style.NOTICE("Criando categorias..."))
 
         categorias = {}

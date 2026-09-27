@@ -1,46 +1,39 @@
 import os
-
+import json
+import logging
 from django.conf import settings
 from django.utils import timezone
-from google import genai
-from pydantic import BaseModel
-
+from groq import Groq
+from pydantic import BaseModel, ConfigDict
 from apps.analysis.models import Analise, Parecer
 from apps.items.models import Item
 from apps.report.models import Reporte
 
-from google.genai.errors import ClientError
-import logging
-
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "gemini-flash-latest"
+MODEL_NAME = "openai/gpt-oss-20b"
 
-client = genai.Client(
-    api_key=getattr(settings, "GEMINI_API_KEY", None) or os.environ.get("GEMINI_API_KEY")
+client = Groq(
+    api_key=getattr(settings, "GROQ_API_KEY", None)
+    or os.environ.get("GROQ_API_KEY")
 )
 
-
-
-# Schema de saída — o SDK obriga o Gemini a responder exatamente nesse formato
-
-
+# Schema de saída. O Groq usa este schema para garantir a estrutura da resposta
 class ComparacaoIA(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     item_candidato_id: int
-    score: int  # 0 a 100
+    score: int
     convergencias: list[str]
     inconsistencias: list[str]
 
-
 class ParecerIA(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     comparacoes: list[ComparacaoIA]
     recomendacao_geral: str
 
-
-
 # Serialização dos dados em texto legível pro modelo
-
-
 def _descrever_reporte_perdido(reporte: Reporte) -> str:
     item = reporte.item
     return (
@@ -51,7 +44,6 @@ def _descrever_reporte_perdido(reporte: Reporte) -> str:
         f"Data da perda: {reporte.data.isoformat()}\n"
         f"Observações: {reporte.observacoes or '—'}"
     )
-
 
 def _descrever_candidato(item: Item) -> str:
     reporte_encontrado = (
@@ -71,12 +63,8 @@ def _descrever_candidato(item: Item) -> str:
         f"Data em que foi encontrado: {data}"
     )
 
-
-
 # Few-shot: 4 cenários calibrando o modelo em ALTO, MÉDIO, BAIXO e NEGATIVO
 # (não repetem o schema, ensinam o padrão de raciocínio e a calibração do score)
-
-
 _EXEMPLO_ALTO = (
     "ITEM PERDIDO:\n"
     "Categoria: Eletrônico\nCor: Preto\nDescrição: Fone de ouvido bluetooth JBL, com estojo de carregamento arranhado\n"
@@ -206,31 +194,48 @@ _EXEMPLO_NEGATIVO = (
 _FEW_SHOT_TURNS = []
 for entrada, saida in (_EXEMPLO_ALTO, _EXEMPLO_MEDIO, _EXEMPLO_BAIXO, _EXEMPLO_NEGATIVO):
     _FEW_SHOT_TURNS.append(("user", entrada))
-    _FEW_SHOT_TURNS.append(("model", saida.model_dump_json()))
+    _FEW_SHOT_TURNS.append(("assistant", saida.model_dump_json()))
 
 
-def _montar_contents(reporte_perdido: Reporte, candidatos: list[Item]) -> list[dict]:
-    contents = []
+def _montar_messages(
+    reporte_perdido: Reporte,
+    candidatos: list[Item]
+) -> tuple[list[dict], str]:
+
+    messages = [
+        {
+            "role": "system",
+            "content": SYSTEM_INSTRUCTION,
+        }
+    ]
 
     for role, text in _FEW_SHOT_TURNS:
-        contents.append({"role": role, "parts": [{"text": text}]})
+        messages.append({
+            "role": role,
+            "content": text,
+        })
 
-    candidatos_texto = "\n\n---\n\n".join(_descrever_candidato(c) for c in candidatos)
-
-    entrada_real = (
-        f"ITEM PERDIDO:\n{_descrever_reporte_perdido(reporte_perdido)}\n\n"
-        f"CANDIDATOS NO ESTOQUE:\n{candidatos_texto}"
+    candidatos_texto = "\n\n---\n\n".join(
+        _descrever_candidato(c)
+        for c in candidatos
     )
 
-    contents.append({"role": "user", "parts": [{"text": entrada_real}]})
+    entrada_real = (
+        f"ITEM PERDIDO:\n"
+        f"{_descrever_reporte_perdido(reporte_perdido)}\n\n"
+        f"CANDIDATOS NO ESTOQUE:\n"
+        f"{candidatos_texto}"
+    )
 
-    return contents, entrada_real
+    messages.append({
+        "role": "user",
+        "content": entrada_real,
+    })
 
+    return messages, entrada_real
 
 
 # Função principal
-
-
 SYSTEM_INSTRUCTION = (
     "Você atua como servidor responsável pelo setor de Achados e Perdidos do IFRN. "
     "Sua tarefa é analisar um item perdido e compará-lo com todos os itens encontrados "
@@ -264,9 +269,10 @@ SYSTEM_INSTRUCTION = (
 
 def gerar_parecer_ia(analise: Analise) -> Parecer:
     """
-    Gera (ou atualiza) o Parecer de uma Análise usando o Gemini para
-    comparar o reporte perdido com os itens candidatos no estoque.
+    Gera (ou atualiza) o Parecer de uma Análise usando a Groq
+    para comparar o reporte perdido com os itens candidatos no estoque.
     """
+
     reporte_perdido = analise.reporte
 
     candidatos = list(
@@ -289,23 +295,46 @@ def gerar_parecer_ia(analise: Analise) -> Parecer:
         )
         return parecer
 
-    contents, entrada_real = _montar_contents(reporte_perdido, candidatos)
+    messages, entrada_real = _montar_messages(
+        reporte_perdido,
+        candidatos
+    )
+
     try:
-        response = client.models.generate_content(
+        response = client.chat.completions.create(
             model=MODEL_NAME,
-            contents=contents,
-            config={
-                "response_mime_type": "application/json",
-                "temperature": 0.2,
-                "response_schema": ParecerIA,
-                "system_instruction": SYSTEM_INSTRUCTION,
+            messages=messages,
+            temperature=0.2,
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "parecer_ia",
+                    "strict": True,
+                    "schema": ParecerIA.model_json_schema(),
+                },
             },
         )
+   
+    except Exception as e:
+        logger.exception(
+            "Falha ao gerar parecer usando Groq."
+        )
 
-        resultado: ParecerIA = response.parsed
+        raise RuntimeError(
+            "Não foi possível gerar o parecer com IA."
+        ) from e
 
-        if not resultado:
-            raise RuntimeError("A IA retornou uma resposta vazia ou inválida.")
+    try:
+        conteudo = response.choices[0].message.content
+
+        if not conteudo:
+            raise RuntimeError(
+                "A IA retornou uma resposta vazia."
+            )
+
+        resultado: ParecerIA = ParecerIA.model_validate(
+            json.loads(conteudo)
+        )
 
         comparacoes = sorted(
             [c.model_dump() for c in resultado.comparacoes],
@@ -313,17 +342,21 @@ def gerar_parecer_ia(analise: Analise) -> Parecer:
             reverse=True,
         )
 
-        score_final = comparacoes[0]["score"] if comparacoes else 0
+        score_final = (
+            comparacoes[0]["score"]
+            if comparacoes
+            else 0
+        )
 
         parecer, _ = Parecer.objects.update_or_create(
             analise=analise,
             defaults={
                 "score_correspondencia": score_final,
                 "convergencias": comparacoes,
-                "inconsistencias": [ 
+                "inconsistencias": [
                     {
                         "item_candidato_id": c["item_candidato_id"],
-                        "inconsistencias": c["inconsistencias"]
+                        "inconsistencias": c["inconsistencias"],
                     }
                     for c in comparacoes
                 ],
@@ -335,17 +368,9 @@ def gerar_parecer_ia(analise: Analise) -> Parecer:
 
         return parecer
 
-    except ClientError as e:
-        logger.exception(e)
-
-        raise RuntimeError(
-            "Não foi possível gerar o parecer com IA."
-        )
-
     except Exception as e:
-
         logger.exception(e)
 
         raise RuntimeError(
-            "Erro inesperado ao comunicar com a IA."
-        )
+            "Erro ao processar a resposta da IA."
+        ) from e

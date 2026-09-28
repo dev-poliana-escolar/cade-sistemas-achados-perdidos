@@ -42,6 +42,7 @@ jobs:
       ALLOWED_HOSTS: localhost,127.0.0.1
       SOCIAL_AUTH_SUAP_KEY: fake-key
       SOCIAL_AUTH_SUAP_SECRET: fake-secret
+      GROQ_API_KEY: fake-groq-key
       DJANGO_ALLOW_ASYNC_UNSAFE: "true"
 
     steps:

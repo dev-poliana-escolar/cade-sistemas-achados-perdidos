@@ -239,3 +239,38 @@ def gerar_parecer(analise: Analise) -> Parecer:
     )
 
     return parecer
+
+@transaction.atomic
+def editar_analise(
+    analise_id: int,
+    status: Analise.Status,
+    justificativa: str,
+    item_encontrado_id: Optional[int] = None,
+    gerar_novo_parecer: bool = False,
+) -> Analise:
+    """
+    Edita uma análise existente e, opcionalmente, substitui o parecer da IA.
+    """
+
+    if status == Analise.Status.CORRESPONDENCIA_ENCONTRADA and not item_encontrado_id:
+        raise ValidationError(
+            "É obrigatório vincular um item_encontrado quando o status for "
+            "'CORRESPONDENCIA_ENCONTRADA'."
+        )
+
+    analise = Analise.objects.select_for_update().get(pk=analise_id)
+
+    analise.status = status.value if hasattr(status, "value") else status
+    analise.justificativa = justificativa
+
+    if item_encontrado_id:
+        analise.item_encontrado_id = item_encontrado_id
+    else:
+        analise.item_encontrado = None
+
+    analise.save()
+
+    if gerar_novo_parecer:
+        Parecer.objects.filter(analise=analise).delete()
+        gerar_parecer(analise)
+    return analise

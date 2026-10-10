@@ -9,7 +9,6 @@ from django.contrib import messages
 from apps.analysis.services import gerar_parecer
 from apps.analysis import ai as analysis_ai
 
-
 # Create your views here.
 
 @login_required
@@ -35,7 +34,6 @@ def dashboard(request):
         },
     )
 
-
 @login_required
 @staff_member_required
 def pending_reports(request):
@@ -49,7 +47,6 @@ def pending_reports(request):
       "title": "Reportes pendentes de análise",
       'reportes':reportes_itens_perdidos
    })
-
 
 @login_required
 @staff_member_required
@@ -97,8 +94,6 @@ def confirm_delivered(request, id):
    )
 
    return redirect("analysis:dashboard")
-
-
 
 @login_required
 @staff_member_required
@@ -191,3 +186,26 @@ def create_analysis(request, id):
          "comparacoes": comparacoes,
       },
    )
+
+@login_required
+@staff_member_required
+def view_analysis(request, reporte_id):
+   """
+   Exibe a análise de um reporte específico.
+   """
+   try:
+      analise = Analise.objects.get(
+         reporte=reporte_id
+         )
+      return render(
+         request,
+         "analysis/view.html",
+         {
+            "title": "Analise do reporte",
+            "analise": analise,
+            "parecer": getattr(analise,"parecer",None), #impede o lançamento de exceção Parecer.DoesNotExist.
+         }
+      )
+   except Analise.DoesNotExist:
+      messages.error(request, "Análise não encontrada para este reporte.")
+      return redirect("analysis:dashboard")

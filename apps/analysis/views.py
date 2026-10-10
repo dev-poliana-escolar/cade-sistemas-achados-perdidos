@@ -38,16 +38,23 @@ def dashboard(request):
 @staff_member_required
 def pending_reports(request):
    """
-   Lista todos os reportes de tipo PERDIDO 
+   Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
    """
-   reportes_itens_perdidos = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO
+   analise_perda_pendente = Reporte.objects.filter(
+      tipo=Reporte.Tipo.PERDIDO,
+      analises__isnull=True
    )
-   return render (request, 'analysis/pending_reports.html', {
-      "title": "Reportes pendentes de análise",
-      'reportes':reportes_itens_perdidos
-   })
+   analise_perda_feita= Reporte.objects.filter(
+      tipo=Reporte.Tipo.PERDIDO,
+      analises__isnull=False
+   )
 
+   return render (request, 'analysis/pending_reports.html', {
+      "title": "Reportes de perda",
+      'analise_pendente': analise_perda_pendente,
+      'analise_feita': analise_perda_feita,
+   })
+  
 @login_required
 @staff_member_required
 def pending_deliveries(request):
@@ -150,7 +157,7 @@ def create_analysis(request, id):
          )
          analise.save()
          messages.success(request, "Análise finalizada com sucesso.")
-         return redirect("analysis:dashboard")
+         return redirect("analysis:pending_reports")
    else:
       form = AnaliseForm(instance=analise)
       form.fields["item_encontrado"].queryset = itens_encontrados

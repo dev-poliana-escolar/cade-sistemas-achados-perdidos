@@ -14,13 +14,10 @@ from apps.analysis import ai as analysis_ai
 @login_required
 @staff_member_required
 def edit_analysis(request, id):
-    """
-    Recebe os dados para edição de uma Análise existente.
-    """
     analise = get_object_or_404(Analise, id=id)
     
     if request.method == "POST":
-        form = AnaliseForm(request.POST, instance=analise)
+        form = EditarAnaliseForm(request.POST, instance=analise)
         if form.is_valid():
             try:
                 editar_analise(
@@ -36,7 +33,7 @@ def edit_analysis(request, id):
             except ValidationError as e:
                 messages.error(request, e.message)
     else:
-        form = AnaliseForm(instance=analise)
+        form = EditarAnaliseForm(instance=analise)
 
     return render(
         request,
@@ -47,7 +44,6 @@ def edit_analysis(request, id):
             "analise": analise,
         },
     )
-
 
 @login_required
 @staff_member_required
@@ -81,10 +77,10 @@ def pending_reports(request):
    """
    reportes_itens_perdidos = Reporte.objects.filter(
       tipo=Reporte.Tipo.PERDIDO
-   )
+   ).select_related("item").prefetch_related("analises")
    return render (request, 'analysis/pending_reports.html', {
       "title": "Reportes pendentes de análise",
-      'reportes':reportes_itens_perdidos
+      "reportes": reportes_itens_perdidos,
    })
 
 

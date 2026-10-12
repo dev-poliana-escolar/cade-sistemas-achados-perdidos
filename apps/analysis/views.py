@@ -103,6 +103,7 @@ def dashboard(request):
 @login_required
 @staff_member_required
 def pending_reports(request):
+<<<<<<< HEAD
     """
     Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
     """
@@ -120,6 +121,18 @@ def pending_reports(request):
         'analise_pendente': analise_perda_pendente,
         'analise_feita': analise_perda_feita,
     })
+=======
+   """
+   Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
+   """
+   reportes_itens_perdidos = Reporte.objects.filter(
+      tipo=Reporte.Tipo.PERDIDO
+   ).select_related("item").prefetch_related("analises")
+   return render (request, 'analysis/pending_reports.html', {
+      "title": "Reportes pendentes de análise",
+      "reportes": reportes_itens_perdidos,
+   })
+>>>>>>> 2990c3c (feat(analysis): cria view e rota para edicao de analise #3)
   
 @login_required
 @staff_member_required

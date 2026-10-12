@@ -37,5 +37,10 @@ urlpatterns = [
     path( "view/<int:reporte_id>/",
         views.view_analysis,
         name="view"
-    )
+    ),
+    path(
+        "edit/<int:id>/",
+        views.edit_analysis,
+        name="edit"
+    ),
 ]

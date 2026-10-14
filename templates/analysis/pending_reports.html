@@ -28,7 +28,11 @@
                 <td>{{reporte.item.categoria}}</td>
                 <td>{{reporte.data}}</td>
                 <td>
-                    <a href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
+                    {% if reporte.analises %}
+                        <a href="{% url 'analysis:edit' reporte.analises.id %}">Editar analise</a>
+                    {% else %}
+                        <a href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
+                    {% endif %}
                     <a href="#">Ver Detalhes</a>
                 </td>
             </tr>

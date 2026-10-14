@@ -1,14 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.exceptions import ValidationError
 from apps.report.models import Reporte
-from apps.analysis.forms import AnaliseForm
+from apps.analysis.forms import AnaliseForm, EditarAnaliseForm
 from apps.analysis.models import Analise
+from .services import editar_analise
 from apps.items.models import Item
 from django.contrib import messages 
 from apps.analysis.services import gerar_parecer
 from apps.analysis import ai as analysis_ai
-
 
 # Create your views here.
 @login_required

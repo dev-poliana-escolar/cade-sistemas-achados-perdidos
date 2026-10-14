@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Análise{% endblock %}
+
+{% block content %}
+
+<h2>Editar Análise #{{ analise.id }}</h2>
+<p>Reporte associado: #{{ analise.reporte.id }} - {{ analise.reporte.item.categoria }} ({{ analise.reporte.tipo }})</p>
+
+<form method="post" action="{% url 'analysis:edit' analise.id %}">
+    {% csrf_token %}
+    
+    {{ form.as_p }}
+    
+    <button type="submit">Salvar Alterações</button>
+    <a href="{% url 'analysis:pending_reports' %}">Cancelar</a>
+</form>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html'%}
+{% load django_bootstrap5 %}
+
+{% block title%}
+{{title}}
+{%endblock%}
+
+{% block content %}
+<h1>{{title}} {{ analise.reporte.id}}</h1>
+
+<p> Administrador responsável: {{analise.administrador}}</p>
+<p>Justificativa: {{analise.justificativa}}</p>
+<p>Data da análise: {{analise.data_analise}}</p>
+<p>Situação da analise: {{analise.get_status_display}}</p>
+
+{% endblock content %}

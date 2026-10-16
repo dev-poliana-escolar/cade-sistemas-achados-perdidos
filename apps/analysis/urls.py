@@ -29,6 +29,11 @@ urlpatterns=[
         "create/<int:id>/",
         views.create_analysis,
         name="create"
+    ),
+    path(
+        "view/<int:reporte_id>/",
+        views.view_analysis,
+        name="view"
     )
 
 ]

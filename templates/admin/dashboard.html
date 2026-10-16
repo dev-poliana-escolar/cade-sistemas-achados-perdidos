@@ -6,10 +6,10 @@
 
    <h2>Painel Administrativo</h2>
 
-    <h3>Entregas Pendentes</h3>
+    <h3>Entregas sem confirmação</h3>
     {% include "partials/analysis/table_pending_deliveries.html" with reportes=entregas_pendentes %}
 
-    <h3>Reportes de Perda Pendentes de Análise</h3>
+    <h3>Perdas pendentes de análise</h3>
     {% include "partials/analysis/table_pending_reports.html" with reportes=reportes_perdidos %}
 </div>
 

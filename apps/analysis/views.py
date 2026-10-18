@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages 
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import ValidationError
+
 from apps.report.models import Reporte
 from apps.analysis.forms import AnaliseForm, EditarAnaliseForm
-from apps.analysis.models import Analise
+from apps.analysis.models import Analise, Parecer
 from .services import editar_analise
 from apps.items.models import Item
-from django.contrib import messages 
 from apps.analysis.services import gerar_parecer
 from apps.analysis import ai as analysis_ai
 
@@ -15,36 +16,66 @@ from apps.analysis import ai as analysis_ai
 @login_required
 @staff_member_required
 def edit_analysis(request, id):
-    analise = get_object_or_404(Analise, id=id)
+      analise = get_object_or_404(Analise, id=id)
     
-    if request.method == "POST":
-        form = EditarAnaliseForm(request.POST, instance=analise)
-        if form.is_valid():
-            try:
-                editar_analise(
-                    analise_id=analise.id,
-                    status=form.cleaned_data["status"],  
-                    justificativa=form.cleaned_data["justificativa"],
-                    item_encontrado=form.cleaned_data.get("item_encontrado"),  
-                    gerar_novo_parecer=(request.POST.get("action") == "regerar_parecer"),
-                )
-                messages.success(request, "Análise atualizada com sucesso.")
-                return redirect("analysis:dashboard")
+      if request.method == "POST":
+         action = request.POST.get("action")
+         is_regerar = (action == "regerar_parecer")
+         form = EditarAnaliseForm(request.POST, instance=analise)
+         if form.is_valid():
+            
+               item_encontrado = form.cleaned_data.get("item_encontrado")
 
-            except ValidationError as e:
-                messages.error(request, e.message)
-    else:
-        form = EditarAnaliseForm(instance=analise)
+               if is_regerar and not item_encontrado:
+                  messages.warning(
+                     request, 
+                     "Selecione um 'Item encontrado' para poder gerar o parecer com a IA."
+                  )
+                  return redirect("analysis:edit", id=analise.id)
+               
+               try:
+                  editar_analise(
+                        analise_id=analise.id, 
+                        status=form.cleaned_data["status"],   
+                        justificativa=form.cleaned_data["justificativa"], 
+                        item_encontrado=item_encontrado,   
+                        gerar_novo_parecer=is_regerar,
+                  )
+                  
+                  if is_regerar and not form.cleaned_data.get("item_encontrado"):
+                     messages.warning(request, "Selecione um 'Item encontrado' para poder gerar o parecer com a IA.")
+                     return redirect("analysis:edit", id=analise.id)
+   
+                  if is_regerar:
+                     messages.success(request, "Análise salva e NOVO parecer gerado pela IA com sucesso!")
+                     return redirect("analysis:edit", id=analise.id)
+                  else:
+                     messages.success(request, "Análise atualizada com sucesso.") 
+                     return redirect("analysis:dashboard")
 
-    return render(
-        request,
-        "analysis/edit.html",
-        {
-            "title": f"Editar Análise #{analise.id}",
-            "form": form,
-            "analise": analise,
-        },
-    )
+               except ValidationError as e:
+                  messages.error(request, e.message)
+               except RuntimeError:
+                  messages.warning(
+                     request, 
+                     "Os dados foram salvos, mas a IA está indisponível e não pôde gerar o parecer. "
+                     "Foi mantido ou gerado um parecer padrão/heurístico."
+                  )           
+                  return redirect("analysis:edit", id=analise.id)    
+      else:
+         form = EditarAnaliseForm(instance=analise)
+
+      parecer_atual = Parecer.objects.filter(analise=analise).first()
+      return render(
+         request,
+         "analysis/edit.html",
+         {
+               "title": f"Editar Análise #{analise.id}",
+               "form": form,
+               "analise": analise,
+               "parecer": parecer_atual,
+         },
+      )
 
 @login_required
 @staff_member_required

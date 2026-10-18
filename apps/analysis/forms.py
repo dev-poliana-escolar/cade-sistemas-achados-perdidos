@@ -23,16 +23,20 @@ class AnaliseForm(forms.ModelForm):
 class EditarAnaliseForm(AnaliseForm):
     """
     Formulário específico para edição.
-    Herda tudo do AnaliseForm e adiciona o campo 'status' sem quebrar o original.
+    Herda tudo do AnaliseForm e adiciona o campo 'status'.
     """
     class Meta(AnaliseForm.Meta):
         fields = AnaliseForm.Meta.fields + ["status"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["item_encontrado"].queryset = Item.objects.filter(
-            status=Item.Status.NO_ESTOQUE
-        )
+        
+        queryset = Item.objects.filter(status=Item.Status.NO_ESTOQUE)
+        
+        if self.instance and self.instance.item_encontrado_id:
+            queryset = queryset | Item.objects.filter(pk=self.instance.item_encontrado_id)
+            
+        self.fields["item_encontrado"].queryset = queryset.distinct()
 
     def clean_status(self) -> Analise.Status:
         """

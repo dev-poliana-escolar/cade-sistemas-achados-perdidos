@@ -30,6 +30,7 @@
                 <td>{{reporte.data}}</td>
                 <td>
                     <a class="btn btn-primary"href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'report:detail' reporte.id %}">Ver detalhes</a>
                 </td>
             </tr>
         {% empty %}
@@ -63,6 +64,7 @@
             <td>{{reporte.analises.get_status_display}}</td>    
             <td>
                 <a  href="{% url 'analysis:view' reporte.id %}">Exibir análise</a>
+                <a class="btn btn-outline-secondary" href="{% url 'report:detail' reporte.id %}">Ver detalhes</a>
             </td>
         </tr>
     {% empty %}

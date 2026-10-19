@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detalhes do Reporte
+{% endblock %}
+
+{% block content %}
+<section aria-labelledby="report-detail-title">
+    <div class="detail-header">
+        <h1 id="report-detail-title">Detalhes do Reporte</h1>
+        <a href="{% url 'analysis:dashboard' %}" class="btn-action primary">
+            Voltar ao painel
+        </a>
+    </div>
+
+    <div class="detail-grid">
+        <article class="card">
+            <h2>Dados do Reporte</h2>
+            <dl class="detail-list">
+                <dt>Tipo</dt>
+                <dd>
+                    {% if reporte.tipo == "ENCONTRADO" %}
+                        <span class="status-badge status-ENCONTRADO">
+                            {{ reporte.get_tipo_display }}
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-PERDIDO">
+                            {{ reporte.get_tipo_display }}
+                        </span>
+                    {% endif %}
+                </dd>
+
+                <dt>Data e hora</dt>
+                <dd>{{ reporte.data|date:"d/m/Y H:i" }}</dd>
+
+                <dt>Local</dt>
+                <dd>{{ reporte.local }}</dd>
+
+                <dt>Observações</dt>
+                <dd>
+                    {% if reporte.observacoes %}
+                        {{ reporte.observacoes|linebreaksbr }}
+                    {% else %}
+                        <span class="detail-muted">Nenhuma observação informada.</span>
+                    {% endif %}
+                </dd>
+            </dl>
+        </article>
+
+        <article class="card">
+            <h2>Dados do Solicitante/Relator</h2>
+            <dl class="detail-list">
+                <dt>Nome</dt>
+                <dd>
+                    {% if reporte.usuario.get_full_name %}
+                        {{ reporte.usuario.get_full_name }}
+                    {% else %}
+                        <span class="detail-muted">Nome não informado</span>
+                    {% endif %}
+                </dd>
+
+                <dt>Username</dt>
+                <dd>{{ reporte.usuario.username }}</dd>
+
+                <dt>E-mail</dt>
+                <dd>
+                    {% if reporte.usuario.email %}
+                        <a href="mailto:{{ reporte.usuario.email }}">
+                            {{ reporte.usuario.email }}
+                        </a>
+                    {% else %}
+                        <span class="detail-muted">E-mail não informado</span>
+                    {% endif %}
+                </dd>
+            </dl>
+        </article>
+
+        <article class="card detail-item-card">
+            <h2>Dados do Item</h2>
+            <div class="detail-item-content">
+                <div>
+                    {% if reporte.item.imagem %}
+                        <img src="{{ reporte.item.imagem.url }}"
+                             alt="Imagem do item"
+                             class="detail-item-image">
+                    {% else %}
+                        <p class="detail-muted">Imagem não informada.</p>
+                    {% endif %}
+                </div>
+
+                <dl class="detail-list">
+                    <dt>Categoria</dt>
+                    <dd>{{ reporte.item.categoria }}</dd>
+
+                    <dt>Cor</dt>
+                    <dd>{{ reporte.item.cor }}</dd>
+
+                    <dt>Descrição</dt>
+                    <dd>{{ reporte.item.descricao }}</dd>
+
+                    <dt>Status atual</dt>
+                    <dd>
+                        <span class="status-badge">
+                            {{ reporte.item.get_status_display }}
+                        </span>
+                    </dd>
+
+                    {% if reporte.item.dados_sensiveis %}
+                        <dt>Dados sensíveis</dt>
+                        <dd>
+                            <p class="message warning" role="alert">
+                                Atenção: este item contém dados sensíveis.
+                            </p>
+                        </dd>
+                    {% endif %}
+
+                    {% if reporte.item.data_despacho %}
+                        <dt>Data de despacho</dt>
+                        <dd>
+                            {{ reporte.item.data_despacho|date:"d/m/Y H:i" }}
+                        </dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </article>
+    </div>
+</section>
+{% endblock %}

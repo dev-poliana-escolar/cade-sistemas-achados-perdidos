@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 # Create your views here.
 
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import redirect, render
@@ -23,6 +24,27 @@ def my_reports(request):
     reportes= Reporte.objects.filter(usuario=request.user)
 
     return render( request, "report/my_reports.html", {"reportes": reportes})
+
+
+@staff_member_required
+def report_detail(request, id):
+    """
+    Exibe os dados completos de um reporte para administradores.
+    """
+
+    reporte = get_object_or_404(
+        Reporte.objects.select_related("usuario", "item__categoria", "item__cor"),
+        id=id,
+    )
+
+    return render(
+        request,
+        "report/detail.html",
+        {
+            "title": "Detalhes do Reporte",
+            "reporte": reporte,
+        },
+    )
 
 
 @login_required

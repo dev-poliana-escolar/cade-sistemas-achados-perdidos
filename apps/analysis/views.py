@@ -100,22 +100,27 @@ def dashboard(request):
         },
     )
 
-
 @login_required
 @staff_member_required
 def pending_reports(request):
-   """
-   Lista todos os reportes de tipo PERDIDO 
-   """
-   reportes_itens_perdidos = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO
-   ).select_related("item").prefetch_related("analises")
-   return render (request, 'analysis/pending_reports.html', {
-      "title": "Reportes pendentes de análise",
-      "reportes": reportes_itens_perdidos,
-   })
+    """
+    Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
+    """
+    analise_perda_pendente = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=True
+    )
+    analise_perda_feita = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=False
+    )
 
-
+    return render(request, 'analysis/pending_reports.html', {
+        "title": "Reportes de perda",
+        'analise_pendente': analise_perda_pendente,
+        'analise_feita': analise_perda_feita,
+    })
+  
 @login_required
 @staff_member_required
 def pending_deliveries(request):
@@ -162,8 +167,6 @@ def confirm_delivered(request, id):
    )
 
    return redirect("analysis:dashboard")
-
-
 
 @login_required
 @staff_member_required
@@ -220,7 +223,7 @@ def create_analysis(request, id):
          )
          analise.save()
          messages.success(request, "Análise finalizada com sucesso.")
-         return redirect("analysis:dashboard")
+         return redirect("analysis:pending_reports")
    else:
       form = AnaliseForm(instance=analise)
       form.fields["item_encontrado"].queryset = itens_encontrados
@@ -256,3 +259,26 @@ def create_analysis(request, id):
          "comparacoes": comparacoes,
       },
    )
+
+@login_required
+@staff_member_required
+def view_analysis(request, reporte_id):
+   """
+   Exibe a análise de um reporte específico.
+   """
+   try:
+      analise = Analise.objects.get(
+         reporte=reporte_id
+         )
+      return render(
+         request,
+         "analysis/view.html",
+         {
+            "title": "Analise do reporte",
+            "analise": analise,
+            "parecer": getattr(analise,"parecer",None), #impede o lançamento de exceção Parecer.DoesNotExist.
+         }
+      )
+   except Analise.DoesNotExist:
+      messages.error(request, "Análise não encontrada para este reporte.")
+      return redirect("analysis:dashboard")

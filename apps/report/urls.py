@@ -17,6 +17,11 @@ urlpatterns = [
         name="my_reports"
     ),
     path(
+        "detail/<int:id>/",
+        views.report_detail,
+        name="detail"
+    ),
+    path(
         "delete/<int:id>/",
         views.report_delete,
         name="delete"

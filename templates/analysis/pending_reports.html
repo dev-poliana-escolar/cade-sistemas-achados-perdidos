@@ -16,25 +16,24 @@
             <th>Tipo</th>
             <th>Categoria do Item</th>
             <th>Data e Hora da Perda</th>
-           
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
-        
         {% for reporte in analise_pendente %}
             <tr>
                 <td>{{ reporte.id }}</td>
                 <td>{{ reporte.tipo }}</td>
-                <td>{{reporte.item.categoria}}</td>
-                <td>{{reporte.data}}</td>
+                <td>{{ reporte.item.categoria }}</td>
+                <td>{{ reporte.data }}</td>
                 <td>
-                    <a class="btn btn-primary"href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
+                    <a class="btn btn-primary btn-sm" href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
+                    <a class="btn btn-secondary btn-sm" href="#">Ver Detalhes</a>
                 </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="6">Nenhum reporte pendente encontrado.</td>
+                <td colspan="5">Nenhum reporte pendente encontrado.</td>
             </tr>            
         {% endfor %}
     </tbody>
@@ -53,16 +52,18 @@
     </tr>
 </thead>
 <tbody>
-    
     {% for reporte in analise_feita %}
         <tr>
             <td>{{ reporte.id }}</td>
             <td>{{ reporte.tipo }}</td>
-            <td>{{ reporte.item.categoria}}</td>
-            <td>{{ reporte.data}}</td>
-            <td>{{reporte.analises.get_status_display}}</td>    
+            <td>{{ reporte.item.categoria }}</td>
+            <td>{{ reporte.data }}</td>
+            <td>{{ reporte.analises.get_status_display }}</td>    
             <td>
-                <a  href="{% url 'analysis:view' reporte.id %}">Exibir análise</a>
+                {% if reporte.analises %}
+                    <a class="btn btn-warning btn-sm" href="{% url 'analysis:edit' reporte.analises.id %}">Editar análise</a>
+                {% endif %}
+                <a class="btn btn-info btn-sm" href="{% url 'analysis:view' reporte.id %}">Exibir análise</a>
             </td>
         </tr>
     {% empty %}
@@ -73,4 +74,4 @@
 </tbody>
 </table>
 
-{% endblock%}
+{% endblock %}

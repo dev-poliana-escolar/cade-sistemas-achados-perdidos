@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Editar Análise #{{ analise.id }}</h2>
+
+    <div class="row">
+        <!-- LADO ESQUERDO: INFORMAÇÕES DO REPORTE E PARECER DA IA -->
+        <div class="col-md-5">
+            <!-- CARD DO REPORTE (ITEM PERDIDO) -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header">
+                    <h4 class="mb-0">Reporte associado - #{{ analise.reporte.id }}</h4>
+                </div>
+
+                <div class="card-body">
+                    <p><strong>Categoria:</strong> {{ analise.reporte.item.categoria }}</p>
+                    <p><strong>Cor:</strong> {{ analise.reporte.item.cor }}</p>
+                    <p><strong>Descrição:</strong> {{ analise.reporte.item.descricao }}</p>
+                    <p><strong>Local informado:</strong> {{ analise.reporte.local }}</p>
+                    <p><strong>Data da perda:</strong> {{ analise.reporte.data }}</p>
+
+                    {% if analise.reporte.observacoes %}
+                    <p class="mb-0">
+                        <strong>Observações:</strong> {{ analise.reporte.observacoes }}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CARD DO FEEDBACK (PARECER DA IA) -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Feedback IA (Parecer atual)</h4>
+                </div>
+
+                <div class="card-body">
+                    {% if parecer %}
+                    <p>
+                        <strong>Score de correspondência:</strong>
+                        {% if parecer.score_correspondencia is not None %}
+                            {{ parecer.score_correspondencia }}/100
+                        {% else %}
+                            --/100
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <strong>Recomendação:</strong><br />
+                        {{ parecer.recomendacao|default:"Nenhuma recomendação informada." }}
+                    </p>
+
+                    <p class="text-muted small mb-0">
+                        Gerado em {{ parecer.data_criacao|date:"d/m/Y H:i" }}
+                    </p>
+                    {% else %}
+                    <p class="text-muted mb-0">
+                        Nenhum parecer gerado para esta análise ainda.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- LADO DIREITO: FORMULÁRIO DE EDIÇÃO -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4>Atualizar Dados da Análise</h4>
+                </div>
+
+                <div class="card-body">
+                    <form method="post" action="{% url 'analysis:edit' analise.id %}">
+                        {% csrf_token %}
+
+                        <!-- Campo: Status -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ form.status.label }}</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger small">{{ form.status.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo: Item Encontrado -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ form.item_encontrado.label }}</label>
+                            {{ form.item_encontrado }}
+                            <div class="form-text text-muted">
+                                Selecione o item caso a correspondência tenha sido encontrada.
+                            </div>
+                            {% if form.item_encontrado.errors %}
+                            <div class="text-danger small">
+                                {{ form.item_encontrado.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo: Justificativa -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ form.justificativa.label }}</label>
+                            {{ form.justificativa }}
+                            {% if form.justificativa.errors %}
+                            <div class="text-danger small">
+                                {{ form.justificativa.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <hr />
+
+                        <!-- BOTÕES DE AÇÃO -->
+                        <div class="d-flex gap-2 mt-3">
+                            <button type="submit" name="action" value="salvar" class="btn btn-primary">
+                                Salvar Alterações
+                            </button>
+
+                            <button type="submit" name="action" value="regerar_parecer" class="btn btn-outline-primary">
+                                Salvar e Gerar Novo Parecer IA
+                            </button>
+
+                            <a href="{% url 'analysis:dashboard' %}" class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

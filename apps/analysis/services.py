@@ -1,10 +1,11 @@
 # apps/analysis/services.py
 from difflib import SequenceMatcher
+from django.db import transaction
+from typing import Optional, Union
 
 from apps.items.models import Item
 from apps.report.models import Reporte
 from apps.analysis.models import Analise, Parecer
-
 
 def _similaridade_texto(texto_a: str, texto_b: str) -> float:
     """Retorna similaridade entre 0 e 1 usando comparação de sequências."""
@@ -239,3 +240,35 @@ def gerar_parecer(analise: Analise) -> Parecer:
     )
 
     return parecer
+
+@transaction.atomic
+def editar_analise(
+    analise_id: int,
+    status: Analise.Status,
+    justificativa: str,
+    item_encontrado: Optional[Union[Item, int]] = None,
+    gerar_novo_parecer: bool = False,
+) -> Analise:
+    """
+    Edita uma análise existente e, opcionalmente, substitui o parecer da IA.
+    """
+    item_id = item_encontrado.id if isinstance(item_encontrado, Item) else item_encontrado
+
+    if status == Analise.Status.CORRESPONDENCIA_ENCONTRADA and not item_id:
+        raise ValidationError(
+            "É obrigatório vincular um item_encontrado quando o status for "
+            "'CORRESPONDENCIA_ENCONTRADA'."
+        )
+
+    analise = Analise.objects.select_for_update().get(pk=analise_id)
+
+    analise.status = status.value if hasattr(status, "value") else status
+    analise.justificativa = justificativa
+    analise.item_encontrado_id = item_id
+
+    analise.save()
+
+    if gerar_novo_parecer:
+        Parecer.objects.filter(analise=analise).delete()
+        gerar_parecer(analise)
+    return analise

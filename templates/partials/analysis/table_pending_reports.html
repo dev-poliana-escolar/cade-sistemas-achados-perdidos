@@ -19,7 +19,12 @@
                     <td>{{ reporte.item.categoria }}</td>
                     <td>{{ reporte.data }}</td>
                     <td>
-                        <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
+                        {% if reporte.analises %}
+                            <a href="{% url 'analysis:edit' reporte.analises.id %}" class="btn btn-warning btn-sm me-1">Editar análise</a>
+                        {% else %}
+                            <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
+                        {% endif %}
+                        
                         <a href="#" class="btn btn-outline-secondary btn-sm">Ver Detalhes</a>
                     </td>
                 </tr>
@@ -31,5 +36,4 @@
         </tbody>
     </table>
 </div>
-
 {% endblock %}

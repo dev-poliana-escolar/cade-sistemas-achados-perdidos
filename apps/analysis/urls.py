@@ -1,9 +1,9 @@
 from django.urls import path
 from apps.analysis import views
 
-app_name= 'analysis'
+app_name = "analysis"
 
-urlpatterns=[
+urlpatterns = [
     path(
         "pending_reports/",
         views.pending_reports,
@@ -18,7 +18,6 @@ urlpatterns=[
         "confirm_delivered/<int:id>/",
         views.confirm_delivered,
         name="confirm_delivered"
-
     ),
     path(
         "dashboard/",
@@ -31,9 +30,17 @@ urlpatterns=[
         name="create"
     ),
     path(
-        "view/<int:reporte_id>/",
+        "edit/<int:id>/",
+        views.edit_analysis,
+        name="edit"
+    ),
+    path( "view/<int:reporte_id>/",
         views.view_analysis,
         name="view"
-    )
-
+    ),
+    path(
+        "edit/<int:id>/",
+        views.edit_analysis,
+        name="edit"
+    ),
 ]

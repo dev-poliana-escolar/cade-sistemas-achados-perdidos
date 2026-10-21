@@ -8,8 +8,42 @@ from apps.items.models import Item
 from django.contrib import messages 
 from apps.analysis.services import gerar_parecer
 from apps.analysis import ai as analysis_ai
+from .forms import EditarAnaliseForm
 
 # Create your views here.
+@login_required
+@staff_member_required
+def edit_analysis(request, id):
+    analise = get_object_or_404(Analise, id=id)
+    
+    if request.method == "POST":
+        form = EditarAnaliseForm(request.POST, instance=analise)
+        if form.is_valid():
+            try:
+                editar_analise(
+                    analise_id=analise.id,
+                    status=form.cleaned_data["status"],  
+                    justificativa=form.cleaned_data["justificativa"],
+                    item_encontrado=form.cleaned_data.get("item_encontrado"),  
+                    gerar_novo_parecer=(request.POST.get("action") == "regerar_parecer"),
+                )
+                messages.success(request, "Análise atualizada com sucesso.")
+                return redirect("analysis:dashboard")
+
+            except ValidationError as e:
+                messages.error(request, e.message)
+    else:
+        form = EditarAnaliseForm(instance=analise)
+
+    return render(
+        request,
+        "analysis/edit.html",
+        {
+            "title": f"Editar Análise #{analise.id}",
+            "form": form,
+            "analise": analise,
+        },
+    )
 
 @login_required
 @staff_member_required
@@ -33,29 +67,28 @@ def dashboard(request):
             "entregas_pendentes": entregas_pendentes,
         },
     )
-
 @login_required
 @staff_member_required
 def pending_reports(request):
-   """
-   Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
-   """
-   analise_perda_pendente = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=True
-   )
-   analise_perda_feita= Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=False
-   )
+    """
+    Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
+    """
+    analise_perda_pendente = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=True
+    ).select_related("item", "item__categoria")
 
-   return render (request, 'analysis/pending_reports.html', {
-      "title": "Reportes de perda",
-      'analise_pendente': analise_perda_pendente,
-      'analise_feita': analise_perda_feita,
-   })
-  
-@login_required
+    analise_perda_feita = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=False
+    ).select_related("item", "item__categoria").prefetch_related("analises").distinct()
+
+    return render(request, 'analysis/pending_reports.html', {
+        "title": "Reportes de perda",
+        "analise_pendente": analise_perda_pendente,
+        "analise_feita": analise_perda_feita,
+    })
+    
 @staff_member_required
 def pending_deliveries(request):
    """

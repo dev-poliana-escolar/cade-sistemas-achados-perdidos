@@ -6,25 +6,20 @@ Detalhes do Reporte
 
 {% block content %}
 <section aria-labelledby="report-detail-title">
-    <div class="detail-header">
-        <h1 id="report-detail-title">Detalhes do Reporte</h1>
-        <a href="{% url 'analysis:dashboard' %}" class="btn-action primary">
-            Voltar ao painel
-        </a>
-    </div>
+    <a href="{{ back_url }}" class="btn-action primary">Voltar</a>
 
     <div class="detail-grid">
         <article class="card">
-            <h2>Dados do Reporte</h2>
+            <h2>Dados do Reporte #{{ reporte.id }}</h2>
             <dl class="detail-list">
                 <dt>Tipo</dt>
                 <dd>
                     {% if reporte.tipo == "ENCONTRADO" %}
-                        <span class="status-badge status-ENCONTRADO">
+                        <span class="status-badge">
                             {{ reporte.get_tipo_display }}
                         </span>
                     {% else %}
-                        <span class="status-badge status-PERDIDO">
+                        <span class="status-badge">
                             {{ reporte.get_tipo_display }}
                         </span>
                     {% endif %}
@@ -48,7 +43,7 @@ Detalhes do Reporte
         </article>
 
         <article class="card">
-            <h2>Dados do Solicitante/Relator</h2>
+            <h2>Dados do Relator</h2>
             <dl class="detail-list">
                 <dt>Nome</dt>
                 <dd>

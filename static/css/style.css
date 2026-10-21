@@ -133,17 +133,6 @@ main {
     margin-bottom: 1.25rem;
 }
 
-.detail-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.detail-header h1 {
-    margin: 0;
-}
 
 .detail-grid {
     display: grid;
@@ -189,18 +178,6 @@ main {
     margin: 0 auto;
     border-radius: 8px;
     object-fit: contain;
-}
-
-.status-ENCONTRADO {
-    background: #dcfce7;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-}
-
-.status-PERDIDO {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
 }
 
 .item {
@@ -372,11 +349,6 @@ button:active, .btn-action:active {
 
     .card {
         padding: 1.25rem;
-    }
-
-    .detail-header {
-        align-items: flex-start;
-        flex-direction: column;
     }
 
     .detail-grid,

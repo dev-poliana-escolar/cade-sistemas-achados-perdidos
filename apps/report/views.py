@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from apps.items.forms import ItemForm
 from apps.report.forms import ReporteForm
@@ -36,6 +37,13 @@ def report_detail(request, id):
         Reporte.objects.select_related("usuario", "item__categoria", "item__cor"),
         id=id,
     )
+    back_url = request.GET.get("next")
+    if not url_has_allowed_host_and_scheme(
+        back_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        back_url = reverse("analysis:dashboard")
 
     return render(
         request,
@@ -43,6 +51,7 @@ def report_detail(request, id):
         {
             "title": "Detalhes do Reporte",
             "reporte": reporte,
+            "back_url": back_url,
         },
     )
 

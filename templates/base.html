@@ -35,11 +35,11 @@
                     <a href="{% url 'analysis:pending_reports' %}">Reportes de Perda</a>
                 {% else %}
                     <!-- usuários comuns -->
-                    <a href="{% url 'report:my_reports' %}">Meus Reportes</a>
                     <a href="#">Minhas Inscrições em Sorteios</a>
                 {% endif %}
 
                 <!-- todos os usuários logados -->
+                <a href="{% url 'report:my_reports' %}">Meus Reportes</a>
                 <a href="{% url 'items:found_items' %}">Itens Encontrados</a>
                 <a href="{% url 'report:create' %}">Reportar</a>
                 <a href="{% url 'items:donation_items' %}">Itens para Doação</a>

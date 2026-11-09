@@ -20,7 +20,7 @@
                     <td>{{ reporte.data }}</td>
                     <td>
                         <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">Ver Detalhes</a>
+                        <a href="{% url 'report:detail' reporte.id %}?next={{ request.path }}" class="btn btn-outline-primary btn-sm">Ver detalhes</a>
                     </td>
                 </tr>
             {% empty %}

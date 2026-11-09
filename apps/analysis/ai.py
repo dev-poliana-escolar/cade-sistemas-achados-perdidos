@@ -13,10 +13,9 @@ logger = logging.getLogger(__name__)
 
 MODEL_NAME = "openai/gpt-oss-20b"
 
-client = Groq(
-    api_key=getattr(settings, "GROQ_API_KEY", None)
-    or os.environ.get("GROQ_API_KEY")
-)
+def _get_client() -> Groq:
+    api_key = getattr(settings, "GROQ_API_KEY", None) or os.environ.get("GROQ_API_KEY")
+    return Groq(api_key=api_key)
 
 # Schema de saída. O Groq usa este schema para garantir a estrutura da resposta
 class ComparacaoIA(BaseModel):
@@ -301,6 +300,7 @@ def gerar_parecer_ia(analise: Analise) -> Parecer:
     )
 
     try:
+        client = _get_client()
         response = client.chat.completions.create(
             model=MODEL_NAME,
             messages=messages,

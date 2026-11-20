@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from apps.report.models import Reporte
@@ -6,7 +7,7 @@ from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import gerar_parecer
+from apps.analysis.services import editar_analise, gerar_parecer
 from apps.analysis import ai as analysis_ai
 from .forms import EditarAnaliseForm
 
@@ -19,19 +20,26 @@ def edit_analysis(request, id):
     if request.method == "POST":
         form = EditarAnaliseForm(request.POST, instance=analise)
         if form.is_valid():
+            gerar_novo_parecer = request.POST.get("action") == "regerar_parecer"
             try:
                 editar_analise(
                     analise_id=analise.id,
                     status=form.cleaned_data["status"],  
                     justificativa=form.cleaned_data["justificativa"],
                     item_encontrado=form.cleaned_data.get("item_encontrado"),  
-                    gerar_novo_parecer=(request.POST.get("action") == "regerar_parecer"),
+                    gerar_novo_parecer=gerar_novo_parecer,
                 )
+                if gerar_novo_parecer:
+                    messages.success(request, "Análise salva e novo parecer gerado por IA.")
+                    return redirect("analysis:edit", id=analise.id)
+
                 messages.success(request, "Análise atualizada com sucesso.")
                 return redirect("analysis:dashboard")
 
             except ValidationError as e:
                 messages.error(request, e.message)
+            except RuntimeError as e:
+                messages.error(request, str(e))
     else:
         form = EditarAnaliseForm(instance=analise)
 
@@ -42,6 +50,7 @@ def edit_analysis(request, id):
             "title": f"Editar Análise #{analise.id}",
             "form": form,
             "analise": analise,
+            "parecer": getattr(analise, "parecer", None),
         },
     )
 

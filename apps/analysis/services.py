@@ -1,11 +1,13 @@
 # apps/analysis/services.py
 from difflib import SequenceMatcher
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from typing import Optional, Union
 
 from apps.items.models import Item
 from apps.report.models import Reporte
 from apps.analysis.models import Analise, Parecer
+from apps.analysis import ai as analysis_ai
 
 def _similaridade_texto(texto_a: str, texto_b: str) -> float:
     """Retorna similaridade entre 0 e 1 usando comparação de sequências."""
@@ -270,5 +272,5 @@ def editar_analise(
 
     if gerar_novo_parecer:
         Parecer.objects.filter(analise=analise).delete()
-        gerar_parecer(analise)
+        analysis_ai.gerar_parecer_ia(analise)
     return analise

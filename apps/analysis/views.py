@@ -31,10 +31,10 @@ def edit_analysis(request, id):
                 )
                 if gerar_novo_parecer:
                     messages.success(request, "Análise salva e novo parecer gerado por IA.")
-                    return redirect("analysis:edit", id=analise.id)
+                    return redirect("analysis:pending_reports")
 
                 messages.success(request, "Análise atualizada com sucesso.")
-                return redirect("analysis:dashboard")
+                return redirect("analysis:pending_reports")
 
             except ValidationError as e:
                 messages.error(request, e.message)

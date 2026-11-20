@@ -27,8 +27,13 @@
                 <td>{{ reporte.item.categoria }}</td>
                 <td>{{ reporte.data }}</td>
                 <td>
+<<<<<<< HEAD
                     <a class="btn btn-primary btn-sm" href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
                     <a class="btn btn-secondary btn-sm" href="#">Ver Detalhes</a>
+=======
+                    <a class="btn btn-primary"href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
+                    <a class="btn btn-outline-secondary" href="{% url 'report:detail' reporte.id %}">Ver detalhes</a>
+>>>>>>> 5d892b5 (feat(analysis): adiciona links para detalhes dos reportes (#12))
                 </td>
             </tr>
         {% empty %}
@@ -60,10 +65,15 @@
             <td>{{ reporte.data }}</td>
             <td>{{ reporte.analises.get_status_display }}</td>    
             <td>
+<<<<<<< HEAD
                 {% if reporte.analises %}
                     <a class="btn btn-warning btn-sm" href="{% url 'analysis:edit' reporte.analises.id %}">Editar análise</a>
                 {% endif %}
                 <a class="btn btn-info btn-sm" href="{% url 'analysis:view' reporte.id %}">Exibir análise</a>
+=======
+                <a  href="{% url 'analysis:view' reporte.id %}">Exibir análise</a>
+                <a class="btn btn-outline-secondary" href="{% url 'report:detail' reporte.id %}">Ver detalhes</a>
+>>>>>>> 5d892b5 (feat(analysis): adiciona links para detalhes dos reportes (#12))
             </td>
         </tr>
     {% empty %}

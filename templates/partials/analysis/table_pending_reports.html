@@ -19,6 +19,7 @@
                     <td>{{ reporte.item.categoria }}</td>
                     <td>{{ reporte.data }}</td>
                     <td>
+<<<<<<< HEAD
                         {% if reporte.analises %}
                             <a href="{% url 'analysis:edit' reporte.analises.id %}" class="btn btn-warning btn-sm me-1">Editar análise</a>
                         {% else %}
@@ -26,6 +27,10 @@
                         {% endif %}
                         
                         <a href="#" class="btn btn-outline-secondary btn-sm">Ver Detalhes</a>
+=======
+                        <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
+                        <a href="{% url 'report:detail' reporte.id %}" class="btn btn-outline-secondary btn-sm">Ver Detalhes</a>
+>>>>>>> 5d892b5 (feat(analysis): adiciona links para detalhes dos reportes (#12))
                     </td>
                 </tr>
             {% empty %}

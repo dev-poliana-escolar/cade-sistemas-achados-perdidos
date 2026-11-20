@@ -33,6 +33,12 @@ Entregas Pendentes
             <td>{{ reporte.data }}</td>
 
             <td>
+                <a
+                    href="{% url 'report:detail' reporte.id %}"
+                    class="btn btn-outline-primary btn-sm"
+                >
+                    Ver detalhes
+                </a>
                 <form
                     method="post"
                     action="{% url 'analysis:confirm_delivered' reporte.id %}"

@@ -2,12 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
 from apps.report.models import Reporte
 from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import editar_analise, gerar_parecer
+from apps.analysis.services import editar_analise, excluir_analise, gerar_parecer
 from apps.analysis import ai as analysis_ai
 from .forms import EditarAnaliseForm
 
@@ -90,6 +91,8 @@ def pending_reports(request):
     analise_perda_feita = Reporte.objects.filter(
         tipo=Reporte.Tipo.PERDIDO,
         analises__isnull=False
+    ).filter(
+        analises__data_exclusao__isnull=True
     ).select_related("item", "item__categoria").prefetch_related("analises").distinct()
 
     return render(request, 'analysis/pending_reports.html', {
@@ -258,3 +261,13 @@ def view_analysis(request, reporte_id):
    except Analise.DoesNotExist:
       messages.error(request, "Análise não encontrada para este reporte.")
       return redirect("analysis:dashboard")
+
+
+@login_required
+@staff_member_required
+@require_POST
+def delete_analysis(request, id):
+   analise = get_object_or_404(Analise, pk=id)
+   excluir_analise(analise.id)
+   messages.success(request, "Análise excluída com sucesso.")
+   return redirect("analysis:pending_reports")

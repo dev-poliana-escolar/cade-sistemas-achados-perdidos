@@ -34,6 +34,11 @@ urlpatterns = [
         views.edit_analysis,
         name="edit"
     ),
+    path(
+        "delete/<int:id>/",
+        views.delete_analysis,
+        name="delete"
+    ),
     path( "view/<int:reporte_id>/",
         views.view_analysis,
         name="view"

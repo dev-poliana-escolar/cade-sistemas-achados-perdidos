@@ -2,6 +2,7 @@
 from difflib import SequenceMatcher
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 from typing import Optional, Union
 
 from apps.items.models import Item
@@ -273,4 +274,28 @@ def editar_analise(
     if gerar_novo_parecer:
         Parecer.objects.filter(analise=analise).delete()
         analysis_ai.gerar_parecer_ia(analise)
+    return analise
+
+
+@transaction.atomic
+def excluir_analise(analise_id: int) -> Analise:
+    """Marca uma análise como excluída sem remover seus dados relacionados."""
+    analise = Analise.all_objects.select_for_update().get(pk=analise_id)
+
+    if analise.data_exclusao is None:
+        analise.data_exclusao = timezone.now()
+        analise.save(update_fields=["data_exclusao"])
+
+    return analise
+
+
+@transaction.atomic
+def restaurar_analise(analise_id: int) -> Analise:
+    """Restaura uma análise previamente excluída."""
+    analise = Analise.all_objects.select_for_update().get(pk=analise_id)
+
+    if analise.data_exclusao is not None:
+        analise.data_exclusao = None
+        analise.save(update_fields=["data_exclusao"])
+
     return analise

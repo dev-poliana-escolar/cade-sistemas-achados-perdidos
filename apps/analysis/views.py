@@ -16,9 +16,13 @@ from apps.analysis import ai as analysis_ai
 def dashboard(request):
 
     reportes_perdidos = Reporte.objects.filter(
-        tipo=Reporte.Tipo.PERDIDO,
-        analises__isnull=True
-    )
+        tipo=Reporte.Tipo.PERDIDO
+    ).exclude(
+        analises__status__in=[
+            Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+            Analise.Status.SEM_CORRESPONDENCIA,
+        ]
+    ).distinct()
 
     entregas_pendentes = Reporte.objects.filter(
         tipo=Reporte.Tipo.ENCONTRADO,
@@ -38,16 +42,23 @@ def dashboard(request):
 @staff_member_required
 def pending_reports(request):
    """
-   Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
+   Lista todos os reportes de tipo PERDIDO com análise pendente ou feita.
    """
    analise_perda_pendente = Reporte.objects.filter(
+      tipo=Reporte.Tipo.PERDIDO
+   ).exclude(
+      analises__status__in=[
+         Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+         Analise.Status.SEM_CORRESPONDENCIA,
+      ]
+   ).distinct()
+   analise_perda_feita = Reporte.objects.filter(
       tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=True
-   )
-   analise_perda_feita= Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=False
-   )
+      analises__status__in=[
+         Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+         Analise.Status.SEM_CORRESPONDENCIA,
+      ]
+   ).distinct()
 
    return render (request, 'analysis/pending_reports.html', {
       "title": "Reportes de perda",
@@ -111,9 +122,20 @@ def create_analysis(request, id):
 
    analise, created = Analise.objects.get_or_create(
       reporte=reporte,
-      administrador=request.user,
-      defaults={"status": Analise.Status.EM_ANALISE},
+      defaults={
+         "administrador": request.user,
+         "status": Analise.Status.EM_ANALISE},
    )
+
+   if analise.status in [
+      Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+      Analise.Status.SEM_CORRESPONDENCIA,
+   ]:
+      return redirect("analysis:view", reporte_id=reporte.id)
+
+   if analise.status == Analise.Status.PENDENTE:
+      analise.status = Analise.Status.EM_ANALISE
+      analise.save(update_fields=["status"])
 
    itens_encontrados = Item.objects.filter(
       status=Item.Status.NO_ESTOQUE

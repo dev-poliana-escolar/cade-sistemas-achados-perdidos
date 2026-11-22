@@ -1,15 +1,64 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_POST
 from apps.report.models import Reporte
 from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import gerar_parecer
+from apps.analysis.services import (
+    editar_analise,
+    excluir_analise,
+    gerar_parecer,
+    restaurar_analise,
+)
 from apps.analysis import ai as analysis_ai
+from .forms import EditarAnaliseForm
 
 # Create your views here.
+@login_required
+@staff_member_required
+def edit_analysis(request, id):
+    analise = get_object_or_404(Analise, id=id)
+    
+    if request.method == "POST":
+        form = EditarAnaliseForm(request.POST, instance=analise)
+        if form.is_valid():
+            gerar_novo_parecer = request.POST.get("action") == "regerar_parecer"
+            try:
+                editar_analise(
+                    analise_id=analise.id,
+                    status=form.cleaned_data["status"],  
+                    justificativa=form.cleaned_data["justificativa"],
+                    item_encontrado=form.cleaned_data.get("item_encontrado"),  
+                    gerar_novo_parecer=gerar_novo_parecer,
+                )
+                if gerar_novo_parecer:
+                    messages.success(request, "Análise salva e novo parecer gerado por IA.")
+                    return redirect("analysis:pending_reports")
+
+                messages.success(request, "Análise atualizada com sucesso.")
+                return redirect("analysis:pending_reports")
+
+            except ValidationError as e:
+                messages.error(request, e.message)
+            except RuntimeError as e:
+                messages.error(request, str(e))
+    else:
+        form = EditarAnaliseForm(instance=analise)
+
+    return render(
+        request,
+        "analysis/edit.html",
+        {
+            "title": f"Editar Análise #{analise.id}",
+            "form": form,
+            "analise": analise,
+            "parecer": getattr(analise, "parecer", None),
+        },
+    )
 
 @login_required
 @staff_member_required
@@ -33,29 +82,42 @@ def dashboard(request):
             "entregas_pendentes": entregas_pendentes,
         },
     )
-
 @login_required
 @staff_member_required
 def pending_reports(request):
-   """
-   Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
-   """
-   analise_perda_pendente = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=True
-   )
-   analise_perda_feita= Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=False
-   )
+    """
+    Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
+    """
+    analise_perda_pendente = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=True
+    ).select_related("item", "item__categoria")
 
-   return render (request, 'analysis/pending_reports.html', {
-      "title": "Reportes de perda",
-      'analise_pendente': analise_perda_pendente,
-      'analise_feita': analise_perda_feita,
-   })
-  
-@login_required
+    analise_perda_feita = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=False
+    ).filter(
+        analises__data_exclusao__isnull=True
+    ).select_related("item", "item__categoria").prefetch_related("analises").distinct()
+
+    mostrar_excluidas = request.GET.get("show") == "deleted"
+    analise_perda_excluida = Reporte.objects.none()
+    if mostrar_excluidas:
+        analise_perda_excluida = Reporte.objects.filter(
+            tipo=Reporte.Tipo.PERDIDO,
+            analises__data_exclusao__isnull=False,
+        ).select_related(
+            "item", "item__categoria"
+        ).prefetch_related("analises").distinct()
+
+    return render(request, 'analysis/pending_reports.html', {
+        "title": "Reportes de perda",
+        "analise_pendente": analise_perda_pendente,
+        "analise_feita": analise_perda_feita,
+        "analise_excluida": analise_perda_excluida,
+        "mostrar_excluidas": mostrar_excluidas,
+    })
+    
 @staff_member_required
 def pending_deliveries(request):
    """
@@ -201,7 +263,7 @@ def view_analysis(request, reporte_id):
    Exibe a análise de um reporte específico.
    """
    try:
-      analise = Analise.objects.get(
+      analise = Analise.all_objects.get(
          reporte=reporte_id
          )
       return render(
@@ -216,3 +278,27 @@ def view_analysis(request, reporte_id):
    except Analise.DoesNotExist:
       messages.error(request, "Análise não encontrada para este reporte.")
       return redirect("analysis:dashboard")
+
+
+@login_required
+@staff_member_required
+@require_POST
+def delete_analysis(request, id):
+   analise = get_object_or_404(Analise, pk=id)
+   excluir_analise(analise.id)
+   messages.success(request, "Análise excluída com sucesso.")
+   return redirect("analysis:pending_reports")
+
+
+@login_required
+@staff_member_required
+@require_POST
+def restore_analysis(request, id):
+   analise = get_object_or_404(
+      Analise.all_objects,
+      pk=id,
+      data_exclusao__isnull=False,
+   )
+   restaurar_analise(analise.id)
+   messages.success(request, "Análise recuperada com sucesso.")
+   return redirect("analysis:pending_reports")

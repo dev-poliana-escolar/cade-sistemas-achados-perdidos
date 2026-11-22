@@ -1,0 +1,32 @@
+[33m8ec7ecf[m[33m ([m[1;36mHEAD[m[33m)[m feat(seed): expandir dados de teste para itens e fluxo de analise
+[33m04d01a7[m[33m ([m[1;31morigin/feature/editar-analise-reporte[m[33m)[m merge: resolve conflitos aceitando alteracoes da develop
+[33m491563b[m fix(analysis): ajusta sintaxe das tags e layout do template edit.html #3
+[33m9977b16[m feat(analysis): implementa logica de edicao e reprocessamento na view #3
+[33maef2acc[m feat(analysis): adiciona campos e validacoes no formulario de edicao #3
+[33m26120ac[m feat(analysis): cria template base de edicao de analise #3
+[33m791f1a8[m fix(analysis): resolve erro de importacao na view de edicao #3
+[33m7f69fe7[m feat(analysis): ajusta renderizacao condicional na tabela de pendencias #3
+[33m8cb07ff[m refactor(analysis): ajusta tratamento de enum no form e suporte a objeto/id no service #3
+[33md244696[m feat(analysis): cria view e rota para edicao de analise #3
+[33m8c6f1fe[m Merge branch 'main' into feature/editar-analise-reporte
+[33mc5600a8[m[33m ([m[1;32mmain[m[33m)[m pr: Merge pull request #9 from isaim0011/fix/ci-groq-api-key
+[33maf97d9a[m style: ajusta perdas pendentes de analise e add a exibição dela #2
+[33m586b681[m refactor(view):  ajusta a visualização de reportes de perda #2
+[33m29c4291[m chore(docker):  configura healthcheck Em um dos testes, o container do banco havia sido iniciado, mas ainda não estava pronto para conexões. Quando o web tentou se conectar e não conseguiu, tive que digitar outro comando para reiniciar a conexão. Portando, adicionei o healthcheck no docker-compose para que o container do banco seja verificado antes de iniciar o web.
+[33me39a211[m feat(view): visualizar analise de um reporte de perda
+[33m5f3a3f8[m fix(deps): restore pytest-playwright in requirements.txt for CI e2e flags
+[33mddd2e45[m refactor(settings): remove duplicate GROQ_API_KEY definition
+[33m9209bf6[m feat(analysis): adiciona service e views de editar_analise #3
+[33mf49783a[m fix(ci): add GROQ_API_KEY to test workflow and initialize Groq client lazily
+[33mc86d778[m mr: pull request #7 from isaim0011/feature/accessibility-layout-improvements
+[33ma4143a1[m Merge pull request #8 from dev-poliana-escolar/feat/mcp
+[33m4b5c135[m[33m ([m[1;31morigin/feat/mcp[m[33m)[m refactor(ai): modificação do modelo de ai #1
+[33m7d6d2a8[m chore: atualiza requirements e variaveis de ambiente Enxuguei o requirements, removendo pacotes que não estavam sendo utilizados pela aplicação. Atualizei variaveis de ambiente, visto que não utilizaremos mais o GEMINI.
+[33m03db6d5[m feat(ui): improve layout, responsive design, and accessibility across templates
+[33m5b371e4[m fix(seed): verifica se o banco já possui dados Ao tentar subir o container existente, o comando de seed tentava inserir dados no banco novamente, gerando erro de duplicidade.
+[33m7a0b12e[m chore(requirements): dependencias fastmcp
+[33mad074d4[m docs(readme): mostra saída do terminal
+[33m03c89df[m docs(readme): ajusta nota
+[33m85db7d5[m feat(seed): adiciona população inicial do banco
+[33m8f9aae0[m ci(docker): comando de pré-dados
+[33m0fe6dc2[m docs(readme): coloca comando no lugar correto

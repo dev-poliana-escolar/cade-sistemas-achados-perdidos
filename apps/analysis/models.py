@@ -4,6 +4,12 @@ from django.contrib.auth.models import User
 from apps.items.models import Item
 # Create your models here.
 
+
+class AnaliseAtivaManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(data_exclusao__isnull=True)
+
+
 class Analise(models.Model):
     class Status(models.TextChoices):
         PENDENTE = "PENDENTE", "Pendente"
@@ -40,6 +46,16 @@ class Analise(models.Model):
     justificativa = models.TextField()
 
     data_analise = models.DateTimeField(auto_now_add=True)
+
+    data_exclusao = models.DateTimeField(null=True, blank=True)
+
+    objects = AnaliseAtivaManager()
+    all_objects = models.Manager()
+
+    class Meta:
+        default_manager_name = "objects"
+        base_manager_name = "all_objects"
+
 
 class Parecer(models.Model):
     """

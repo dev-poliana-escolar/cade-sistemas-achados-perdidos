@@ -1,10 +1,14 @@
 # apps/analysis/services.py
 from difflib import SequenceMatcher
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
+from typing import Optional, Union
 
 from apps.items.models import Item
 from apps.report.models import Reporte
 from apps.analysis.models import Analise, Parecer
-
+from apps.analysis import ai as analysis_ai
 
 def _similaridade_texto(texto_a: str, texto_b: str) -> float:
     """Retorna similaridade entre 0 e 1 usando comparação de sequências."""
@@ -239,3 +243,59 @@ def gerar_parecer(analise: Analise) -> Parecer:
     )
 
     return parecer
+
+@transaction.atomic
+def editar_analise(
+    analise_id: int,
+    status: Analise.Status,
+    justificativa: str,
+    item_encontrado: Optional[Union[Item, int]] = None,
+    gerar_novo_parecer: bool = False,
+) -> Analise:
+    """
+    Edita uma análise existente e, opcionalmente, substitui o parecer da IA.
+    """
+    item_id = item_encontrado.id if isinstance(item_encontrado, Item) else item_encontrado
+
+    if status == Analise.Status.CORRESPONDENCIA_ENCONTRADA and not item_id:
+        raise ValidationError(
+            "É obrigatório vincular um item_encontrado quando o status for "
+            "'CORRESPONDENCIA_ENCONTRADA'."
+        )
+
+    analise = Analise.objects.select_for_update().get(pk=analise_id)
+
+    analise.status = status.value if hasattr(status, "value") else status
+    analise.justificativa = justificativa
+    analise.item_encontrado_id = item_id
+
+    analise.save()
+
+    if gerar_novo_parecer:
+        Parecer.objects.filter(analise=analise).delete()
+        analysis_ai.gerar_parecer_ia(analise)
+    return analise
+
+
+@transaction.atomic
+def excluir_analise(analise_id: int) -> Analise:
+    """Marca uma análise como excluída sem remover seus dados relacionados."""
+    analise = Analise.all_objects.select_for_update().get(pk=analise_id)
+
+    if analise.data_exclusao is None:
+        analise.data_exclusao = timezone.now()
+        analise.save(update_fields=["data_exclusao"])
+
+    return analise
+
+
+@transaction.atomic
+def restaurar_analise(analise_id: int) -> Analise:
+    """Restaura uma análise previamente excluída."""
+    analise = Analise.all_objects.select_for_update().get(pk=analise_id)
+
+    if analise.data_exclusao is not None:
+        analise.data_exclusao = None
+        analise.save(update_fields=["data_exclusao"])
+
+    return analise

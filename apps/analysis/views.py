@@ -8,7 +8,12 @@ from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import editar_analise, excluir_analise, gerar_parecer
+from apps.analysis.services import (
+    editar_analise,
+    excluir_analise,
+    gerar_parecer,
+    restaurar_analise,
+)
 from apps.analysis import ai as analysis_ai
 from .forms import EditarAnaliseForm
 
@@ -95,10 +100,22 @@ def pending_reports(request):
         analises__data_exclusao__isnull=True
     ).select_related("item", "item__categoria").prefetch_related("analises").distinct()
 
+    mostrar_excluidas = request.GET.get("show") == "deleted"
+    analise_perda_excluida = Reporte.objects.none()
+    if mostrar_excluidas:
+        analise_perda_excluida = Reporte.objects.filter(
+            tipo=Reporte.Tipo.PERDIDO,
+            analises__data_exclusao__isnull=False,
+        ).select_related(
+            "item", "item__categoria"
+        ).prefetch_related("analises").distinct()
+
     return render(request, 'analysis/pending_reports.html', {
         "title": "Reportes de perda",
         "analise_pendente": analise_perda_pendente,
         "analise_feita": analise_perda_feita,
+        "analise_excluida": analise_perda_excluida,
+        "mostrar_excluidas": mostrar_excluidas,
     })
     
 @staff_member_required
@@ -246,7 +263,7 @@ def view_analysis(request, reporte_id):
    Exibe a análise de um reporte específico.
    """
    try:
-      analise = Analise.objects.get(
+      analise = Analise.all_objects.get(
          reporte=reporte_id
          )
       return render(
@@ -270,4 +287,18 @@ def delete_analysis(request, id):
    analise = get_object_or_404(Analise, pk=id)
    excluir_analise(analise.id)
    messages.success(request, "Análise excluída com sucesso.")
+   return redirect("analysis:pending_reports")
+
+
+@login_required
+@staff_member_required
+@require_POST
+def restore_analysis(request, id):
+   analise = get_object_or_404(
+      Analise.all_objects,
+      pk=id,
+      data_exclusao__isnull=False,
+   )
+   restaurar_analise(analise.id)
+   messages.success(request, "Análise recuperada com sucesso.")
    return redirect("analysis:pending_reports")

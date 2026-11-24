@@ -58,7 +58,7 @@ def comparar_itens(reporte_perdido: Reporte, item_candidato: Item) -> dict:
         pontos += 15
     else:
         inconsistencias.append(
-            f"Cor divergente ({item_perdido.cor} × {item_candidato.cor})"
+            f"Cor divergente"
         )
         penalidade += 10
 

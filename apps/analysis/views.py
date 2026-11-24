@@ -78,9 +78,13 @@ def edit_analysis(request, id):
 def dashboard(request):
 
     reportes_perdidos = Reporte.objects.filter(
-        tipo=Reporte.Tipo.PERDIDO,
-        analises__isnull=True
-    )
+        tipo=Reporte.Tipo.PERDIDO
+    ).exclude(
+        analises__status__in=[
+            Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+            Analise.Status.SEM_CORRESPONDENCIA,
+        ]
+    ).distinct()
 
     entregas_pendentes = Reporte.objects.filter(
         tipo=Reporte.Tipo.ENCONTRADO,
@@ -98,25 +102,37 @@ def dashboard(request):
 @login_required
 @staff_member_required
 def pending_reports(request):
-    """
-    Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
-    """
-    analise_perda_pendente = Reporte.objects.filter(
-        tipo=Reporte.Tipo.PERDIDO,
-        analises__isnull=True
-    ).select_related("item", "item__categoria")
+   """
+   Lista todos os reportes de tipo PERDIDO com análise pendente ou feita.
+   """
+   status_finalizados = [
+      Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+      Analise.Status.SEM_CORRESPONDENCIA,
+   ]
 
-    analise_perda_feita = Reporte.objects.filter(
-        tipo=Reporte.Tipo.PERDIDO,
-        analises__isnull=False
-    ).select_related("item", "item__categoria").prefetch_related("analises").distinct()
+   analise_perda_pendente = (
+      Reporte.objects.filter(tipo=Reporte.Tipo.PERDIDO)
+      .exclude(analises__status__in=status_finalizados)
+      .select_related("item", "item__categoria", "analises")
+      .distinct()
+   )
 
-    return render(request, 'analysis/pending_reports.html', {
-        "title": "Reportes de perda",
-        "analise_pendente": analise_perda_pendente,
-        "analise_feita": analise_perda_feita,
-    })
-    
+   analise_perda_feita = (
+      Reporte.objects.filter(
+         tipo=Reporte.Tipo.PERDIDO,
+         analises__status__in=status_finalizados,
+      )
+      .select_related("item", "item__categoria", "analises")
+      .distinct()
+   )
+
+   return render(request, 'analysis/pending_reports.html', {
+      "title": "Reportes de perda",
+      "analise_pendente": analise_perda_pendente,
+      "analise_feita": analise_perda_feita,
+   })
+
+@login_required   
 @staff_member_required
 def pending_deliveries(request):
    """
@@ -177,6 +193,16 @@ def create_analysis(request, id):
          "status": Analise.Status.EM_ANALISE
          },
    )
+
+   if analise.status in [
+      Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+      Analise.Status.SEM_CORRESPONDENCIA,
+   ]:
+      return redirect("analysis:view", reporte_id=reporte.id)
+
+   if analise.status == Analise.Status.PENDENTE:
+      analise.status = Analise.Status.EM_ANALISE
+      analise.save(update_fields=["status"])
 
    itens_encontrados = Item.objects.filter(
       status=Item.Status.NO_ESTOQUE

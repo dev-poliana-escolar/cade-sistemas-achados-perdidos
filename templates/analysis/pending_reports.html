@@ -21,19 +21,20 @@
     </thead>
     <tbody>
         {% for reporte in analise_pendente %}
-        <tr>
-            <td>{{ reporte.id }}</td>
-            <td>{{ reporte.tipo }}</td>
-            <td>{{ reporte.item.categoria }}</td>
-            <td>{{ reporte.data }}</td>
-            <td>
-                <a class="btn btn-primary btn-sm" href="{% url 'analysis:create' reporte.id %}">Iniciar analise</a>
-                <a class="btn btn-outline-primary btn-sm"
-                    href="{% url 'report:detail' reporte.id %}?next={{ request.path }}">Ver detalhes</a>
-            </td>
-
-
-        </tr>
+            <tr>
+                <td>{{ reporte.id }}</td>
+                <td>{{ reporte.tipo }}</td>
+                <td>{{ reporte.item.categoria }}</td>
+                <td>{{ reporte.data }}</td>
+                <td>
+                    {% if reporte.analises %}
+                        <a class="btn btn-primary btn-sm" href="{% url 'analysis:create' reporte.id %}">Retomar análise</a>
+                    {% else %}
+                        <a class="btn btn-primary btn-sm" href="{% url 'analysis:create' reporte.id %}">Iniciar análise</a>
+                    {% endif %}
+                    <a class="btn btn-outline-primary btn-sm" href="{% url 'report:detail' reporte.id %}?next={{ request.path }}">Ver detalhes</a>
+                </td>
+            </tr>
         {% empty %}
         <tr>
             <td colspan="5">Nenhum reporte pendente encontrado.</td>

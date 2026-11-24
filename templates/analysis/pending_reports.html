@@ -68,7 +68,7 @@
                         <a class="btn btn-warning btn-sm" href="{% url 'analysis:edit' reporte.analises.id %}">Editar análise</a>
                     {% endif %}
                 {% endif %}
-                <a class="btn btn-info btn-sm" href="{% url 'analysis:view' reporte.id %}">Exibir análise</a>
+                <a class="btn btn-info btn-sm" href="{% url 'analysis:view' reporte.id %}">Ver decisão</a>
                 <a class="btn btn-outline-primary btn-sm" href="{% url 'report:detail' reporte.id %}?next={{ request.path }}">Ver detalhes</a>
             </td>
         </tr>

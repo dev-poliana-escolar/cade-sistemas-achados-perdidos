@@ -34,6 +34,9 @@
             <div class="card shadow-sm">
                 <div class="card-header">
                     <h4 class="mb-0">Feedback IA (Parecer atual)</h4>
+                    {% if is_preview %}
+                        <span class="badge bg-warning text-dark">Pré-visualização (não salvo)</span>
+                    {% endif %}
                 </div>
 
                 <div class="card-body">
@@ -52,16 +55,25 @@
                         {{ parecer.recomendacao|default:"Nenhuma recomendação informada." }}
                     </p>
 
-                    <p class="text-muted small mb-0">
-                        Gerado em {{ parecer.data_criacao|date:"d/m/Y H:i" }}
-                    </p>
-                    {% else %}
+                        {% if parecer.data_criacao %}
+                            <p class="text-muted small mb-0">
+                                Gerado em {{ parecer.data_criacao|date:"d/m/Y H:i" }}
+                            </p>
+                        {% else %}
+                            <p class="text-warning small mb-0">
+                                Aguardando confirmação em "Salvar Alterações".
+                            </p>
+                        {% endif %}
+                        
+                        {% else %}
                     <p class="text-muted mb-0">
                         Nenhum parecer gerado para esta análise ainda.
                     </p>
                     {% endif %}
                 </div>
             </div>
+
+            
         </div>
 
         <!-- LADO DIREITO: FORMULÁRIO DE EDIÇÃO -->
@@ -118,7 +130,7 @@
                             </button>
 
                             <button type="submit" name="action" value="regerar_parecer" class="btn btn-outline-primary">
-                                Salvar e Gerar Novo Parecer IA
+                                Gerar Novo Parecer IA
                             </button>
 
                             <a href="{% url 'analysis:pending_reports' %}" class="btn btn-outline-secondary">

@@ -7,7 +7,7 @@ from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import editar_analise, gerar_parecer
+from apps.analysis.services import editar_analise, gerar_parecer, simular_novo_parecer_ia
 from apps.analysis import ai as analysis_ai
 from .forms import EditarAnaliseForm
 
@@ -15,44 +15,63 @@ from .forms import EditarAnaliseForm
 @login_required
 @staff_member_required
 def edit_analysis(request, id):
-    analise = get_object_or_404(Analise, id=id)
-    
-    if request.method == "POST":
-        form = EditarAnaliseForm(request.POST, instance=analise)
-        if form.is_valid():
-            gerar_novo_parecer = request.POST.get("action") == "regerar_parecer"
-            try:
-                editar_analise(
-                    analise_id=analise.id,
-                    status=form.cleaned_data["status"],  
-                    justificativa=form.cleaned_data["justificativa"],
-                    item_encontrado=form.cleaned_data.get("item_encontrado"),  
-                    gerar_novo_parecer=gerar_novo_parecer,
-                )
-                if gerar_novo_parecer:
-                    messages.success(request, "Análise salva e novo parecer gerado por IA.")
-                    return redirect("analysis:pending_reports")
+   analise = get_object_or_404(Analise, id=id)
+   session_key = f"preview_parecer_{analise.id}"
+   preview_parecer = None
 
-                messages.success(request, "Análise atualizada com sucesso.")
-                return redirect("analysis:pending_reports")
+   if request.method == "POST":
+      action = request.POST.get("action")
+      form = EditarAnaliseForm(request.POST, instance=analise)
 
-            except ValidationError as e:
-                messages.error(request, e.message)
-            except RuntimeError as e:
-                messages.error(request, str(e))
-    else:
-        form = EditarAnaliseForm(instance=analise)
+      if action == "regerar_parecer":
+         try:
+               preview_parecer = simular_novo_parecer_ia(analise)
+               request.session[session_key] = preview_parecer
+               messages.info(
+                  request,
+                  "Novo parecer gerado para pré-visualização. "
+                  "Clique em 'Salvar Alterações' para confirmar.",
+               )
+         except RuntimeError as e:
+               messages.error(request, str(e))
+               preview_parecer = request.session.get(session_key)
+      elif action == "salvar":
+            preview_parecer = request.session.get(session_key)
+            if form.is_valid():
+               try:
+                  editar_analise(
+                        analise_id=analise.id,
+                        status=form.cleaned_data["status"],
+                        justificativa=form.cleaned_data["justificativa"],
+                        item_encontrado=form.cleaned_data.get("item_encontrado"),
+                        novo_parecer_dados=preview_parecer,
+                  )
+                  request.session.pop(session_key, None)
+                  messages.success(request, "Análise atualizada com sucesso.")
+                  return redirect("analysis:pending_reports")
 
-    return render(
-        request,
-        "analysis/edit.html",
-        {
-            "title": f"Editar Análise #{analise.id}",
-            "form": form,
-            "analise": analise,
-            "parecer": getattr(analise, "parecer", None),
-        },
-    )
+               except ValidationError as e:
+                  messages.error(request, e.message)
+               except RuntimeError as e:
+                  messages.error(request, str(e))
+   else:
+      # Ao abrir a página do zero (GET), descarta qualquer prévia não salva
+      request.session.pop(session_key, None)
+      form = EditarAnaliseForm(instance=analise)
+
+   parecer_exibido = preview_parecer or getattr(analise, "parecer", None)
+
+   return render(
+      request,
+      "analysis/edit.html",
+      {
+         "title": f"Editar Análise #{analise.id}",
+         "form": form,
+         "analise": analise,
+         "parecer": parecer_exibido,
+         "is_preview": preview_parecer is not None,
+      },
+   )
 
 @login_required
 @staff_member_required
@@ -153,8 +172,10 @@ def create_analysis(request, id):
 
    analise, created = Analise.objects.get_or_create(
       reporte=reporte,
-      administrador=request.user,
-      defaults={"status": Analise.Status.EM_ANALISE},
+      defaults={
+         "administrador": request.user,
+         "status": Analise.Status.EM_ANALISE
+         },
    )
 
    itens_encontrados = Item.objects.filter(

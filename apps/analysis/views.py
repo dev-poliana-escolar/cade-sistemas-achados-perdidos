@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from apps.report.models import Reporte
@@ -6,10 +7,71 @@ from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import gerar_parecer
+from apps.analysis.services import editar_analise, gerar_parecer, simular_novo_parecer_ia
 from apps.analysis import ai as analysis_ai
+from .forms import EditarAnaliseForm
 
 # Create your views here.
+@login_required
+@staff_member_required
+def edit_analysis(request, id):
+   analise = get_object_or_404(Analise, id=id)
+   session_key = f"preview_parecer_{analise.id}"
+   preview_parecer = None
+
+   if request.method == "POST":
+      action = request.POST.get("action")
+      form = EditarAnaliseForm(request.POST, instance=analise)
+
+      if action == "regerar_parecer":
+         try:
+               preview_parecer = simular_novo_parecer_ia(analise)
+               request.session[session_key] = preview_parecer
+               messages.info(
+                  request,
+                  "Novo parecer gerado para pré-visualização. "
+                  "Clique em 'Salvar Alterações' para confirmar.",
+               )
+         except RuntimeError as e:
+               messages.error(request, str(e))
+               preview_parecer = request.session.get(session_key)
+      elif action == "salvar":
+            preview_parecer = request.session.get(session_key)
+            if form.is_valid():
+               try:
+                  editar_analise(
+                        analise_id=analise.id,
+                        status=form.cleaned_data["status"],
+                        justificativa=form.cleaned_data["justificativa"],
+                        item_encontrado=form.cleaned_data.get("item_encontrado"),
+                        novo_parecer_dados=preview_parecer,
+                  )
+                  request.session.pop(session_key, None)
+                  messages.success(request, "Análise atualizada com sucesso.")
+                  return redirect("analysis:pending_reports")
+
+               except ValidationError as e:
+                  messages.error(request, e.message)
+               except RuntimeError as e:
+                  messages.error(request, str(e))
+   else:
+      # Ao abrir a página do zero (GET), descarta qualquer prévia não salva
+      request.session.pop(session_key, None)
+      form = EditarAnaliseForm(instance=analise)
+
+   parecer_exibido = preview_parecer or getattr(analise, "parecer", None)
+
+   return render(
+      request,
+      "analysis/edit.html",
+      {
+         "title": f"Editar Análise #{analise.id}",
+         "form": form,
+         "analise": analise,
+         "parecer": parecer_exibido,
+         "is_preview": preview_parecer is not None,
+      },
+   )
 
 @login_required
 @staff_member_required
@@ -37,36 +99,40 @@ def dashboard(request):
             "entregas_pendentes": entregas_pendentes,
         },
     )
-
 @login_required
 @staff_member_required
 def pending_reports(request):
    """
    Lista todos os reportes de tipo PERDIDO com análise pendente ou feita.
    """
-   analise_perda_pendente = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO
-   ).exclude(
-      analises__status__in=[
-         Analise.Status.CORRESPONDENCIA_ENCONTRADA,
-         Analise.Status.SEM_CORRESPONDENCIA,
-      ]
-   ).distinct()
-   analise_perda_feita = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__status__in=[
-         Analise.Status.CORRESPONDENCIA_ENCONTRADA,
-         Analise.Status.SEM_CORRESPONDENCIA,
-      ]
-   ).distinct()
+   status_finalizados = [
+      Analise.Status.CORRESPONDENCIA_ENCONTRADA,
+      Analise.Status.SEM_CORRESPONDENCIA,
+   ]
 
-   return render (request, 'analysis/pending_reports.html', {
+   analise_perda_pendente = (
+      Reporte.objects.filter(tipo=Reporte.Tipo.PERDIDO)
+      .exclude(analises__status__in=status_finalizados)
+      .select_related("item", "item__categoria", "analises")
+      .distinct()
+   )
+
+   analise_perda_feita = (
+      Reporte.objects.filter(
+         tipo=Reporte.Tipo.PERDIDO,
+         analises__status__in=status_finalizados,
+      )
+      .select_related("item", "item__categoria", "analises")
+      .distinct()
+   )
+
+   return render(request, 'analysis/pending_reports.html', {
       "title": "Reportes de perda",
-      'analise_pendente': analise_perda_pendente,
-      'analise_feita': analise_perda_feita,
+      "analise_pendente": analise_perda_pendente,
+      "analise_feita": analise_perda_feita,
    })
-  
-@login_required
+
+@login_required   
 @staff_member_required
 def pending_deliveries(request):
    """
@@ -124,7 +190,8 @@ def create_analysis(request, id):
       reporte=reporte,
       defaults={
          "administrador": request.user,
-         "status": Analise.Status.EM_ANALISE},
+         "status": Analise.Status.EM_ANALISE
+         },
    )
 
    if analise.status in [
@@ -187,7 +254,10 @@ def create_analysis(request, id):
    comparacoes = []
 
    if parecer:
-      ids_avaliados = [c["item_candidato_id"] for c in parecer.convergencias]
+      ids_avaliados = [
+         c["item_candidato_id"] 
+         for c in parecer.convergencias
+      ]
 
       itens_avaliados = {
          item.id: item
@@ -203,6 +273,18 @@ def create_analysis(request, id):
          resultado["item"] = item
          comparacoes.append(resultado)
 
+   comparacoes_por_item = {
+      comparacao["item"].id: comparacao
+      for comparacao in comparacoes
+   }
+   itens_comparacoes = [
+      {
+         "item": item,
+         "comparacao": comparacoes_por_item.get(item.id),
+      }
+      for item in itens_encontrados
+   ]
+
    return render(
       request,
       "analysis/create.html",
@@ -212,7 +294,8 @@ def create_analysis(request, id):
          "reporte": reporte,
          "itens_encontrados": itens_encontrados,
          "parecer": parecer,
-         "comparacoes": comparacoes,
+         "comparacoes_por_item": comparacoes_por_item,
+         "itens_comparacoes": itens_comparacoes, 
       },
    )
 

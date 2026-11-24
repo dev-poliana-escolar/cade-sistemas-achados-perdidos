@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.exceptions import ValidationError
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from apps.report.models import Reporte
@@ -6,10 +7,71 @@ from apps.analysis.forms import AnaliseForm
 from apps.analysis.models import Analise
 from apps.items.models import Item
 from django.contrib import messages 
-from apps.analysis.services import gerar_parecer
+from apps.analysis.services import editar_analise, gerar_parecer, simular_novo_parecer_ia
 from apps.analysis import ai as analysis_ai
+from .forms import EditarAnaliseForm
 
 # Create your views here.
+@login_required
+@staff_member_required
+def edit_analysis(request, id):
+   analise = get_object_or_404(Analise, id=id)
+   session_key = f"preview_parecer_{analise.id}"
+   preview_parecer = None
+
+   if request.method == "POST":
+      action = request.POST.get("action")
+      form = EditarAnaliseForm(request.POST, instance=analise)
+
+      if action == "regerar_parecer":
+         try:
+               preview_parecer = simular_novo_parecer_ia(analise)
+               request.session[session_key] = preview_parecer
+               messages.info(
+                  request,
+                  "Novo parecer gerado para pré-visualização. "
+                  "Clique em 'Salvar Alterações' para confirmar.",
+               )
+         except RuntimeError as e:
+               messages.error(request, str(e))
+               preview_parecer = request.session.get(session_key)
+      elif action == "salvar":
+            preview_parecer = request.session.get(session_key)
+            if form.is_valid():
+               try:
+                  editar_analise(
+                        analise_id=analise.id,
+                        status=form.cleaned_data["status"],
+                        justificativa=form.cleaned_data["justificativa"],
+                        item_encontrado=form.cleaned_data.get("item_encontrado"),
+                        novo_parecer_dados=preview_parecer,
+                  )
+                  request.session.pop(session_key, None)
+                  messages.success(request, "Análise atualizada com sucesso.")
+                  return redirect("analysis:pending_reports")
+
+               except ValidationError as e:
+                  messages.error(request, e.message)
+               except RuntimeError as e:
+                  messages.error(request, str(e))
+   else:
+      # Ao abrir a página do zero (GET), descarta qualquer prévia não salva
+      request.session.pop(session_key, None)
+      form = EditarAnaliseForm(instance=analise)
+
+   parecer_exibido = preview_parecer or getattr(analise, "parecer", None)
+
+   return render(
+      request,
+      "analysis/edit.html",
+      {
+         "title": f"Editar Análise #{analise.id}",
+         "form": form,
+         "analise": analise,
+         "parecer": parecer_exibido,
+         "is_preview": preview_parecer is not None,
+      },
+   )
 
 @login_required
 @staff_member_required
@@ -33,29 +95,28 @@ def dashboard(request):
             "entregas_pendentes": entregas_pendentes,
         },
     )
-
 @login_required
 @staff_member_required
 def pending_reports(request):
-   """
-   Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
-   """
-   analise_perda_pendente = Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=True
-   )
-   analise_perda_feita= Reporte.objects.filter(
-      tipo=Reporte.Tipo.PERDIDO,
-      analises__isnull=False
-   )
+    """
+    Lista todos os reportes de tipo PERDIDO com ANALISE pendente ou feita.
+    """
+    analise_perda_pendente = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=True
+    ).select_related("item", "item__categoria")
 
-   return render (request, 'analysis/pending_reports.html', {
-      "title": "Reportes de perda",
-      'analise_pendente': analise_perda_pendente,
-      'analise_feita': analise_perda_feita,
-   })
-  
-@login_required
+    analise_perda_feita = Reporte.objects.filter(
+        tipo=Reporte.Tipo.PERDIDO,
+        analises__isnull=False
+    ).select_related("item", "item__categoria").prefetch_related("analises").distinct()
+
+    return render(request, 'analysis/pending_reports.html', {
+        "title": "Reportes de perda",
+        "analise_pendente": analise_perda_pendente,
+        "analise_feita": analise_perda_feita,
+    })
+    
 @staff_member_required
 def pending_deliveries(request):
    """
@@ -111,8 +172,10 @@ def create_analysis(request, id):
 
    analise, created = Analise.objects.get_or_create(
       reporte=reporte,
-      administrador=request.user,
-      defaults={"status": Analise.Status.EM_ANALISE},
+      defaults={
+         "administrador": request.user,
+         "status": Analise.Status.EM_ANALISE
+         },
    )
 
    itens_encontrados = Item.objects.filter(

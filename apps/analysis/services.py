@@ -9,6 +9,10 @@ from apps.report.models import Reporte
 from apps.analysis.models import Analise, Parecer
 from apps.analysis import ai as analysis_ai
 
+
+"""
+Comparação de itens sem AI
+"""
 def _similaridade_texto(texto_a: str, texto_b: str) -> float:
     """Retorna similaridade entre 0 e 1 usando comparação de sequências."""
     a = (texto_a or "").strip().lower()
@@ -243,16 +247,45 @@ def gerar_parecer(analise: Analise) -> Parecer:
 
     return parecer
 
+"""
+Serviço de edição de uma análise com a AI
+"""
+class _RollbackPreview(Exception):
+    """Exceção interna para desfazer a transação após capturar a prévia da IA."""
+    pass
+
+def simular_novo_parecer_ia(analise: Analise) -> dict:
+    """
+    Gera o parecer da IA para pré-visualização sem persistir alterações no banco.
+    """
+    dados_preview = {}
+    try:
+        with transaction.atomic():
+            Parecer.objects.filter(analise=analise).delete()
+            novo_parecer = analysis_ai.gerar_parecer_ia(analise)
+            dados_preview = {
+                "score_correspondencia": novo_parecer.score_correspondencia,
+                "recomendacao": novo_parecer.recomendacao,
+                "convergencias": getattr(novo_parecer, "convergencias", []),
+                "inconsistencias": getattr(novo_parecer, "inconsistencias", []),
+            }
+            raise _RollbackPreview()
+    except _RollbackPreview:
+        pass
+
+    return dados_preview
+
 @transaction.atomic
 def editar_analise(
     analise_id: int,
     status: Analise.Status,
     justificativa: str,
     item_encontrado: Optional[Union[Item, int]] = None,
-    gerar_novo_parecer: bool = False,
+    novo_parecer_dados: Optional[dict] = None,
 ) -> Analise:
     """
-    Edita uma análise existente e, opcionalmente, substitui o parecer da IA.
+    Salva a edição da análise e, se houver uma prévia de parecer aprovada,
+    persiste o novo parecer no banco.
     """
     item_id = item_encontrado.id if isinstance(item_encontrado, Item) else item_encontrado
 
@@ -267,10 +300,10 @@ def editar_analise(
     analise.status = status.value if hasattr(status, "value") else status
     analise.justificativa = justificativa
     analise.item_encontrado_id = item_id
-
     analise.save()
 
-    if gerar_novo_parecer:
+    if novo_parecer_dados:
         Parecer.objects.filter(analise=analise).delete()
-        analysis_ai.gerar_parecer_ia(analise)
+        Parecer.objects.create(analise=analise, **novo_parecer_dados)
+
     return analise

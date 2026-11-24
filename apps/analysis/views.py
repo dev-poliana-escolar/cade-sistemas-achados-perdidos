@@ -165,7 +165,10 @@ def create_analysis(request, id):
    comparacoes = []
 
    if parecer:
-      ids_avaliados = [c["item_candidato_id"] for c in parecer.convergencias]
+      ids_avaliados = [
+         c["item_candidato_id"] 
+         for c in parecer.convergencias
+      ]
 
       itens_avaliados = {
          item.id: item
@@ -181,6 +184,18 @@ def create_analysis(request, id):
          resultado["item"] = item
          comparacoes.append(resultado)
 
+   comparacoes_por_item = {
+      comparacao["item"].id: comparacao
+      for comparacao in comparacoes
+   }
+   itens_comparacoes = [
+      {
+         "item": item,
+         "comparacao": comparacoes_por_item.get(item.id),
+      }
+      for item in itens_encontrados
+   ]
+
    return render(
       request,
       "analysis/create.html",
@@ -190,7 +205,8 @@ def create_analysis(request, id):
          "reporte": reporte,
          "itens_encontrados": itens_encontrados,
          "parecer": parecer,
-         "comparacoes": comparacoes,
+         "comparacoes_por_item": comparacoes_por_item,
+         "itens_comparacoes": itens_comparacoes, 
       },
    )
 

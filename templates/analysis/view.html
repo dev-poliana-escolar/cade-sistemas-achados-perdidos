@@ -1,16 +1,63 @@
-{% extends 'base.html'%}
+{% extends 'base.html' %}
 {% load django_bootstrap5 %}
 
-{% block title%}
-{{title}}
-{%endblock%}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<h1>{{title}} {{ analise.reporte.id}}</h1>
+<h1>{{ title }} #{{ analise.reporte.id }}</h1>
 
-<p> Administrador responsável: {{analise.administrador}}</p>
-<p>Justificativa: {{analise.justificativa}}</p>
-<p>Data da análise: {{analise.data_analise}}</p>
-<p>Situação da analise: {{analise.get_status_display}}</p>
+<p><strong>Administrador responsável:</strong> {{ analise.administrador }}</p>
+<p><strong>Justificativa:</strong> {{ analise.justificativa }}</p>
+<p><strong>Data da análise:</strong> {{ analise.data_analise }}</p>
+<p><strong>Situação da análise:</strong> {{ analise.get_status_display }}</p>
+
+<hr>
+
+<h3>Recomendação da IA</h3>
+    {% if parecer %}
+        {% if parecer.recomendacao %}
+            <p class="lead">{{ parecer.recomendacao }}</p>
+        {% endif %}
+
+        {% if item_mais_correspondente %}
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>Item com Maior Correspondência (#{{ item_mais_correspondente.id }})</strong>
+                    <span class="badge bg-primary fs-6">Score: {{ melhor_comparacao.score }}%</span>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><strong>Categoria:</strong> {{ item_mais_correspondente.categoria }}</p>
+                    <p class="mb-1"><strong>Cor:</strong> {{ item_mais_correspondente.cor }}</p>
+                    <p class="mb-3"><strong>Descrição:</strong> {{ item_mais_correspondente.descricao }}</p>
+
+                    <div class="row">
+                        {% if melhor_comparacao.convergencias %}
+                            <div class="col-md-6">
+                                <h6 class="text-success">Convergências</h6>
+                                <ul>
+                                    {% for ponto in melhor_comparacao.convergencias %}
+                                        <li>{{ ponto }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        {% if melhor_comparacao.inconsistencias %}
+                            <div class="col-md-6">
+                                <h6 class="text-danger">Inconsistências</h6>
+                                <ul>
+                                    {% for ponto in melhor_comparacao.inconsistencias %}
+                                        <li>{{ ponto }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">Nenhuma recomendação foi gerada para esta análise.</p>
+    {% endif %}
 
 {% endblock content %}

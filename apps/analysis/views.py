@@ -306,16 +306,29 @@ def view_analysis(request, reporte_id):
    Exibe a análise de um reporte específico.
    """
    try:
-      analise = Analise.objects.get(
-         reporte=reporte_id
-         )
+      analise = Analise.objects.get(reporte=reporte_id)
+      parecer = getattr(analise, "parecer", None)
+
+      melhor_comparacao = None
+      item_mais_correspondente = None
+
+      if parecer and parecer.convergencias:
+         melhor_comparacao = parecer.convergencias[0]
+
+         if melhor_comparacao.get("score", 0) > 35:
+            item_mais_correspondente = Item.objects.filter(
+               id=melhor_comparacao.get("item_candidato_id")
+            ).first()
+      
       return render(
          request,
          "analysis/view.html",
          {
             "title": "Analise do reporte",
             "analise": analise,
-            "parecer": getattr(analise,"parecer",None), #impede o lançamento de exceção Parecer.DoesNotExist.
+            "parecer": parecer,
+            "melhor_comparacao": melhor_comparacao,
+            "item_mais_correspondente": item_mais_correspondente,
          }
       )
    except Analise.DoesNotExist:

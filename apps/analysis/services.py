@@ -1,11 +1,18 @@
 # apps/analysis/services.py
 from difflib import SequenceMatcher
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from typing import Optional, Union
 
 from apps.items.models import Item
 from apps.report.models import Reporte
 from apps.analysis.models import Analise, Parecer
+from apps.analysis import ai as analysis_ai
 
 
+"""
+Comparação de itens sem AI
+"""
 def _similaridade_texto(texto_a: str, texto_b: str) -> float:
     """Retorna similaridade entre 0 e 1 usando comparação de sequências."""
     a = (texto_a or "").strip().lower()
@@ -51,7 +58,7 @@ def comparar_itens(reporte_perdido: Reporte, item_candidato: Item) -> dict:
         pontos += 15
     else:
         inconsistencias.append(
-            f"Cor divergente ({item_perdido.cor} × {item_candidato.cor})"
+            f"Cor divergente"
         )
         penalidade += 10
 
@@ -239,3 +246,64 @@ def gerar_parecer(analise: Analise) -> Parecer:
     )
 
     return parecer
+
+"""
+Serviço de edição de uma análise com a AI
+"""
+class _RollbackPreview(Exception):
+    """Exceção interna para desfazer a transação após capturar a prévia da IA."""
+    pass
+
+def simular_novo_parecer_ia(analise: Analise) -> dict:
+    """
+    Gera o parecer da IA para pré-visualização sem persistir alterações no banco.
+    """
+    dados_preview = {}
+    try:
+        with transaction.atomic():
+            Parecer.objects.filter(analise=analise).delete()
+            novo_parecer = analysis_ai.gerar_parecer_ia(analise)
+            dados_preview = {
+                "score_correspondencia": novo_parecer.score_correspondencia,
+                "recomendacao": novo_parecer.recomendacao,
+                "convergencias": getattr(novo_parecer, "convergencias", []),
+                "inconsistencias": getattr(novo_parecer, "inconsistencias", []),
+            }
+            raise _RollbackPreview()
+    except _RollbackPreview:
+        pass
+
+    return dados_preview
+
+@transaction.atomic
+def editar_analise(
+    analise_id: int,
+    status: Analise.Status,
+    justificativa: str,
+    item_encontrado: Optional[Union[Item, int]] = None,
+    novo_parecer_dados: Optional[dict] = None,
+) -> Analise:
+    """
+    Salva a edição da análise e, se houver uma prévia de parecer aprovada,
+    persiste o novo parecer no banco.
+    """
+    item_id = item_encontrado.id if isinstance(item_encontrado, Item) else item_encontrado
+
+    if status == Analise.Status.CORRESPONDENCIA_ENCONTRADA and not item_id:
+        raise ValidationError(
+            "É obrigatório vincular um item_encontrado quando o status for "
+            "'CORRESPONDENCIA_ENCONTRADA'."
+        )
+
+    analise = Analise.objects.select_for_update().get(pk=analise_id)
+
+    analise.status = status.value if hasattr(status, "value") else status
+    analise.justificativa = justificativa
+    analise.item_encontrado_id = item_id
+    analise.save()
+
+    if novo_parecer_dados:
+        Parecer.objects.filter(analise=analise).delete()
+        Parecer.objects.create(analise=analise, **novo_parecer_dados)
+
+    return analise

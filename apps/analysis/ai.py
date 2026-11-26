@@ -77,20 +77,18 @@ _EXEMPLO_ALTO = (
                 item_candidato_id=12,
                 score=90,
                 convergencias=[
-                    "Mesma categoria (Eletrônico)",
-                    "Mesma cor (Preto)",
-                    "Descrição compatível: ambos citam estojo arranhado/riscado",
-                    "Mesmo local (Biblioteca Central)",
-                    "Encontrado poucas horas após a perda, no mesmo dia",
+                    "Mesma categoria",
+                    "Mesma cor",
+                    "Descrição compatível: estojo arranhado/riscado",
+                    "Mesmo local",
+                    "Encontrado poucas horas após a perda",
                 ],
                 inconsistencias=[],
             ),
         ],
         recomendacao_geral=(
-            "O item #12 apresenta forte correspondência com o item perdido: mesma "
-            "categoria, cor, descrição fisicamente compatível, mesmo local e diferença "
-            "de poucas horas entre a perda e o encontro. Recomenda-se conferência "
-            "física para confirmação."
+            "O item #12 apresenta forte correspondência em categoria, cor, descrição, "
+            "local e horário. Recomenda-se conferência física."
         ),
     ),
 )
@@ -108,22 +106,20 @@ _EXEMPLO_MEDIO = (
                 item_candidato_id=30,
                 score=55,
                 convergencias=[
-                    "Mesma categoria (Mochila)",
-                    "Mesma cor (Azul)",
-                    "Ambas descrições citam bolso frontal",
+                    "Mesma categoria",
+                    "Mesma cor",
+                    "Ambos citam bolso frontal",
                 ],
                 inconsistencias=[
-                    "Descrição do candidato não menciona a alça rasgada, detalhe distintivo do item perdido",
-                    "Local diferente (Bloco B x Bloco C), embora próximos",
-                    "Encontrado 4 dias após a perda — prazo plausível, mas não imediato",
+                    "Não menciona a alça rasgada",
+                    "Local diferente, embora próximo",
+                    "Encontrado 4 dias após a perda",
                 ],
             ),
         ],
         recomendacao_geral=(
-            "O item #30 tem convergências relevantes (categoria, cor, bolso frontal), "
-            "mas falta confirmação do detalhe mais distintivo do item perdido (alça "
-            "rasgada) e o local diverge. Correspondência possível, porém inconclusiva — "
-            "recomenda-se checar fisicamente o estado da alça antes de confirmar."
+            "O item #30 tem convergências relevantes, mas falta confirmar o estado da "
+            "alça e o local diverge. Recomenda-se checagem física."
         ),
     ),
 )
@@ -140,19 +136,18 @@ _EXEMPLO_BAIXO = (
             ComparacaoIA(
                 item_candidato_id=8,
                 score=18,
-                convergencias=["Mesma categoria (Guarda-chuva)"],
+                convergencias=["Mesma categoria"],
                 inconsistencias=[
-                    "Cor completamente diferente (Preto liso x Xadrez vermelho/branco)",
-                    "Material do cabo diferente (madeira x plástico)",
-                    "Local diferente (Refeitório x Estacionamento)",
+                    "Cor diferente",
+                    "Material do cabo diferente",
+                    "Local diferente",
                     "Encontrado 18 dias após a perda",
                 ],
             ),
         ],
         recomendacao_geral=(
-            "O item #8 só compartilha a categoria com o item perdido; cor, material, "
-            "local e prazo divergem significativamente. Baixa probabilidade de "
-            "correspondência."
+            "O item #8 compartilha apenas a categoria; cor, material, local e prazo "
+            "divergem. Baixa probabilidade de correspondência."
         ),
     ),
 )
@@ -170,22 +165,17 @@ _EXEMPLO_NEGATIVO = (
                 item_candidato_id=9,
                 score=3,
                 convergencias=[
-                    "Mesma categoria, cor, descrição e local informados (dados idênticos)"
+                    "Dados textuais idênticos"
                 ],
                 inconsistencias=[
-                    "Diferença de aproximadamente 1600 anos entre a data da perda e a "
-                    "data do encontro — logicamente impossível",
-                    "A semelhança textual provavelmente é coincidência de dados de "
-                    "teste/placeholder, não evidência real de correspondência",
+                    "Diferença de ~1600 anos entre perda e encontro — impossível",
+                    "Provável dado de teste ou placeholder",
                 ],
             ),
         ],
         recomendacao_geral=(
-            "Apesar da aparente identidade textual entre os registros, a diferença de "
-            "datas é logicamente impossível (cerca de 1600 anos), o que invalida "
-            "qualquer correspondência. O score foi forçado para próximo de zero. "
-            "Recomenda-se verificar se há erro de cadastro de data em algum dos "
-            "reportes antes de prosseguir."
+            "Inconsistência temporal impossível invalida a correspondência, apesar dos "
+            "textos idênticos. Verifique o cadastro das datas."
         ),
     ),
 )
@@ -262,7 +252,10 @@ SYSTEM_INSTRUCTION = (
     "Se descrição, cor, local e datas forem fortemente compatíveis, a divergência de categoria não deve impedir uma alta pontuação, mas deve ser registrada como inconsistência.\n"
     "- Pequenas diferenças de descrição não impedem uma boa correspondência.\n"
     "- Seja conservador e não invente informações que não estão nos dados fornecidos.\n"
-    "- Responda apenas utilizando o schema informado."
+    "- Responda apenas utilizando o schema informado.\n"
+    "- Seja direto e conciso em todos os campos.\n"
+    "- Em convergencias e inconsistencias, use frases curtas (máximo 6 palavras), SEM parênteses e sem repetir os valores comparados (escreva apenas 'Categoria diferente' ou 'Local diferente', nunca 'Categoria diferente (Mochila vs Chave)').\n"
+    "- Em recomendacao_geral, resuma a conclusão em no máximo 2 frases curtas.\n"
 )
 
 
@@ -305,6 +298,8 @@ def gerar_parecer_ia(analise: Analise) -> Parecer:
             model=MODEL_NAME,
             messages=messages,
             temperature=0.2,
+            max_completion_tokens=4096,
+            reasoning_effort="medium",
             response_format={
                 "type": "json_schema",
                 "json_schema": {

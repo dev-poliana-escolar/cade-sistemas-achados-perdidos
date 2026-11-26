@@ -12,24 +12,30 @@
             </tr>
         </thead>
         <tbody>
-            {% for reporte in reportes %}
+           {% for reporte in reportes %}
                 <tr>
                     <td><strong>#{{ reporte.id }}</strong></td>
                     <td>{{ reporte.tipo }}</td>
                     <td>{{ reporte.item.categoria }}</td>
                     <td>{{ reporte.data }}</td>
                     <td>
-                        <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
-                        <a href="#" class="btn btn-outline-secondary btn-sm">Ver Detalhes</a>
+                        {% if reporte.analises and reporte.analises.status == 'CORRESPONDENCIA_ENCONTRADA' or reporte.analises and reporte.analises.status == 'SEM_CORRESPONDENCIA' %}
+                            <a href="{% url 'analysis:edit' reporte.analises.id %}" class="btn btn-warning btn-sm me-1">Editar análise</a>
+                        {% elif reporte.analises %}
+                            <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Retomar análise</a>
+                        {% else %}
+                            <a href="{% url 'analysis:create' reporte.id %}" class="btn btn-primary btn-sm me-1">Iniciar análise</a>
+                        {% endif %}
+
+                        <a href="{% url 'report:detail' reporte.id %}?next={{ request.path }}" class="btn btn-outline-primary btn-sm">Ver detalhes</a>
                     </td>
                 </tr>
             {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted py-4">Nenhum reporte pendente encontrado.</td>
-                </tr>
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">Nenhum reporte pendente encontrado.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
 {% endblock %}

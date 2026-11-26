@@ -23,6 +23,7 @@
                     <td>{{ reporte.item.descricao }}</td>
                     <td>{{ reporte.data }}</td>
                     <td>
+                        <a href="{% url 'report:detail' reporte.id %}?next={{ request.path }}" class="btn btn-outline-primary btn-sm me-1">Ver detalhes</a>
                         <form method="post" action="{% url 'analysis:confirm_delivered' reporte.id %}" style="margin: 0;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-success btn-sm">
